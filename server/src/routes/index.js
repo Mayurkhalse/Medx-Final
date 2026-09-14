@@ -1,0 +1,61 @@
+import { Router } from 'express';
+import authRoutes from './authRoutes.js';
+import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/roleGuard.js';
+
+const router = Router();
+
+// Health Check Endpoint
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'medx-unified-api',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Authentication Domain (IAM)
+router.use('/auth', authRoutes);
+
+// Foundation RBAC Verification Route (Used to verify role enforcement)
+router.get('/foundation/rbac-test/:targetRole', requireAuth, (req, res, next) => {
+  const { targetRole } = req.params;
+  requireRole(targetRole)(req, res, () => {
+    res.status(200).json({
+      message: `Access granted: User ${req.user.name} (${req.user.email}) successfully authorized for role '${targetRole}'.`,
+      role: req.user.role,
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email
+      }
+    });
+  });
+});
+
+// Helper to create domain reservation router
+function createReservedDomainRouter(domainName) {
+  const domainRouter = Router();
+  domainRouter.all('*', (req, res) => {
+    res.status(501).json({
+      error: {
+        code: 'DOMAIN_RESERVED',
+        domain: domainName,
+        message: `The ${domainName} domain endpoint '${req.originalUrl}' is reserved in the Phase 1D unified foundation. Domain features will be migrated in subsequent implementation phases.`
+      }
+    });
+  });
+  return domainRouter;
+}
+
+// Reserved Domain Route Trees (Established per Phase 1C Contract)
+router.use('/patient', createReservedDomainRouter('patient'));
+router.use('/reports', createReservedDomainRouter('reports'));
+router.use('/doctor', createReservedDomainRouter('doctor'));
+router.use('/hospital', createReservedDomainRouter('hospital'));
+router.use('/lab', createReservedDomainRouter('lab'));
+router.use('/appointments', createReservedDomainRouter('appointments'));
+router.use('/triage', createReservedDomainRouter('triage'));
+
+export default router;

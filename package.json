@@ -9,8 +9,12 @@
     "server"
   ],
   "scripts": {
-    "dev": "echo \"Phase 1A: Integration workspace initialized. Run Phase 1B+ for application deployment.\"",
-    "test": "echo \"Phase 1A: Tests configured in subsequent phases.\""
+    "dev:client": "npm run dev --workspace=client",
+    "dev:server": "npm run dev --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "build": "npm run build --workspace=client",
+    "start:server": "npm run start --workspace=server",
+    "test": "npm test --workspace=server"
   },
   "keywords": [
     "medx",

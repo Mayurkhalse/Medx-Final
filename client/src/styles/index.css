@@ -1,0 +1,181 @@
+@import './tokens.css';
+
+/* CSS Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--medx-font-sans);
+  background-color: var(--medx-bg);
+  color: var(--medx-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--medx-primary);
+  text-decoration: none;
+  transition: color var(--medx-transition-fast);
+}
+
+a:hover {
+  color: var(--medx-primary-hover);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+}
+
+/* Layout Container */
+.medx-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Common Card */
+.medx-card {
+  background: var(--medx-surface);
+  border: 1px solid var(--medx-border);
+  border-radius: var(--medx-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--medx-shadow-sm);
+}
+
+/* Common Buttons */
+.medx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--medx-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--medx-transition-fast);
+}
+
+.medx-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.medx-btn-primary {
+  background-color: var(--medx-primary);
+  color: var(--medx-text-inverse);
+}
+
+.medx-btn-primary:hover:not(:disabled) {
+  background-color: var(--medx-primary-hover);
+}
+
+.medx-btn-secondary {
+  background-color: var(--medx-surface-muted);
+  color: var(--medx-text-primary);
+  border-color: var(--medx-border);
+}
+
+.medx-btn-secondary:hover:not(:disabled) {
+  background-color: #E2E8F0;
+}
+
+.medx-btn-outline {
+  background-color: transparent;
+  color: var(--medx-primary);
+  border-color: var(--medx-primary);
+}
+
+.medx-btn-outline:hover:not(:disabled) {
+  background-color: var(--medx-primary-light);
+}
+
+/* Form Elements */
+.medx-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.medx-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--medx-text-secondary);
+  margin-bottom: 0.375rem;
+}
+
+.medx-input, .medx-select {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  border: 1px solid var(--medx-border);
+  border-radius: var(--medx-radius-md);
+  background-color: var(--medx-surface);
+  color: var(--medx-text-primary);
+  outline: none;
+  transition: border-color var(--medx-transition-fast), box-shadow var(--medx-transition-fast);
+}
+
+.medx-input:focus, .medx-select:focus {
+  border-color: var(--medx-border-focus);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+}
+
+/* Badges */
+.medx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--medx-radius-full);
+}
+
+.medx-badge-patient {
+  background-color: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.medx-badge-doctor {
+  background-color: #F0FDF4;
+  color: #15803D;
+}
+
+.medx-badge-hospital {
+  background-color: #FAF5FF;
+  color: #7E22CE;
+}
+
+.medx-badge-lab {
+  background-color: #FFF7ED;
+  color: #C2410C;
+}
+
+/* Alert Boxes */
+.medx-alert {
+  padding: 0.875rem 1rem;
+  border-radius: var(--medx-radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.medx-alert-error {
+  background-color: var(--medx-status-danger-bg);
+  border: 1px solid #FECACA;
+  color: var(--medx-status-danger);
+}
+
+.medx-alert-success {
+  background-color: var(--medx-status-normal-bg);
+  border: 1px solid #A7F3D0;
+  color: var(--medx-status-normal);
+}
