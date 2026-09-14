@@ -1,14 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { ShieldCheck, Building2, AlertCircle } from 'lucide-react';
+import {
+  ShieldCheck, Building2, LayoutDashboard,
+  ListOrdered, BedDouble, Users, Stethoscope
+} from 'lucide-react';
+import HospitalDashboard from '../hospital/HospitalDashboard.jsx';
+import HospitalCareQueue from '../hospital/HospitalCareQueue.jsx';
+import HospitalBeds from '../hospital/HospitalBeds.jsx';
+import HospitalPatients from '../hospital/HospitalPatients.jsx';
+import HospitalDoctors from '../hospital/HospitalDoctors.jsx';
 
 export function HospitalWorkspace() {
   const { user, profile, role } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'care-queue' | 'beds' | 'patients' | 'doctors'
 
   return (
-    <div className="medx-container">
-      <div className="medx-card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+    <div className="medx-container" style={{ paddingBottom: '3rem' }}>
+      {/* Hospital Identity Header */}
+      <div className="medx-card" style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               backgroundColor: '#FAF5FF',
@@ -19,11 +29,11 @@ export function HospitalWorkspace() {
               <Building2 size={28} />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--medx-navy)' }}>
-                Hospital Operations Center
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--medx-navy)', margin: 0 }}>
+                {profile?.facilityName || 'Institutional Hospital Operations Center'}
               </h1>
-              <p style={{ color: 'var(--medx-text-secondary)', fontSize: '0.875rem' }}>
-                Institutional Operations, Bed Management & Care Queue Boundary
+              <p style={{ color: 'var(--medx-text-secondary)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>
+                Bed Management • ICU Acuity • 6-Stage Care Queue • Staff & Inpatient Operations
               </p>
             </div>
           </div>
@@ -32,38 +42,149 @@ export function HospitalWorkspace() {
           </span>
         </div>
 
+        {/* Facility Identity Strip */}
         <div style={{
           backgroundColor: 'var(--medx-surface-muted)',
-          padding: '1.25rem',
+          padding: '0.875rem 1.25rem',
           borderRadius: 'var(--medx-radius-md)',
-          marginBottom: '1.5rem'
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1.5rem',
+          fontSize: '0.8125rem',
+          color: 'var(--medx-text-secondary)'
         }}>
-          <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.5rem' }}>Hospital Administrator Identity:</h3>
-          <ul style={{ listStyle: 'none', fontSize: '0.875rem', color: 'var(--medx-text-secondary)' }}>
-            <li><strong>Canonical User ID:</strong> {user?.id}</li>
-            <li><strong>Administrator Name:</strong> {user?.name}</li>
-            <li><strong>Email:</strong> {user?.email}</li>
-            <li><strong>Facility Name:</strong> {profile?.facilityName || 'Main Hospital'}</li>
-            <li><strong>Total Capacity:</strong> {profile?.totalBeds || 100} beds ({profile?.icuBeds || 10} ICU)</li>
-            <li><strong>Legacy Facility ID:</strong> {profile?.legacyId || 'HOSP-Auto'}</li>
-          </ul>
-        </div>
-
-        <div style={{
-          borderLeft: '4px solid #7E22CE',
-          backgroundColor: '#FAF5FF',
-          padding: '1rem 1.25rem',
-          borderRadius: '0 var(--medx-radius-md) var(--medx-radius-md) 0'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <AlertCircle size={18} color="#7E22CE" />
-            <strong style={{ color: '#7E22CE', fontSize: '0.875rem' }}>Phase 1D Foundation Verified</strong>
-          </div>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)' }}>
-            Hospital admin authentication and RBAC boundary are active. 6-stage clinical care queue, bed occupancy management, doctor roster assignment, and Ant Design scoped components will be migrated in subsequent controlled phases.
-          </p>
+          <div><strong>Administrator:</strong> {user?.name} ({user?.email})</div>
+          <div><strong>Facility Code:</strong> {profile?.legacyId || profile?.code || 'HOSP-MEDX-01'}</div>
+          <div><strong>Total Capacity:</strong> {profile?.totalBeds || 100} beds ({profile?.icuBeds || 10} ICU)</div>
+          <div><strong>Status:</strong> <span style={{ color: '#16A34A', fontWeight: 600 }}>24/7 Active Inpatient Operations</span></div>
         </div>
       </div>
+
+      {/* Navigation Tabs */}
+      <div style={{
+        display: 'flex',
+        gap: '0.5rem',
+        borderBottom: '1px solid #E2E8F0',
+        marginBottom: '1.5rem',
+        overflowX: 'auto'
+      }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('dashboard')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'dashboard' ? '#7E22CE' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'dashboard' ? '2px solid #7E22CE' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <LayoutDashboard size={18} />
+          Operations Dashboard
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('care-queue')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'care-queue' ? '#7E22CE' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'care-queue' ? '2px solid #7E22CE' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <ListOrdered size={18} />
+          Care Queue (6-Stage)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('beds')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'beds' ? '#7E22CE' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'beds' ? '2px solid #7E22CE' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <BedDouble size={18} />
+          Beds & ICU Management
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('patients')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'patients' ? '#7E22CE' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'patients' ? '2px solid #7E22CE' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Users size={18} />
+          Inpatient Directory
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('doctors')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'doctors' ? '#7E22CE' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'doctors' ? '2px solid #7E22CE' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Stethoscope size={18} />
+          Physician Roster
+        </button>
+      </div>
+
+      {/* Active Tab Content */}
+      {activeTab === 'dashboard' && <HospitalDashboard onNavigateTab={setActiveTab} />}
+      {activeTab === 'care-queue' && <HospitalCareQueue />}
+      {activeTab === 'beds' && <HospitalBeds />}
+      {activeTab === 'patients' && <HospitalPatients />}
+      {activeTab === 'doctors' && <HospitalDoctors />}
     </div>
   );
 }

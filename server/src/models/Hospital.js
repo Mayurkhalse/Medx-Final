@@ -19,15 +19,43 @@ const hospitalSchema = new mongoose.Schema(
       required: [true, 'Facility name is required'],
       trim: true
     },
+    code: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      sparse: true
+    },
     facilityType: {
       type: String,
       enum: ['General Hospital', 'Super Specialty', 'Clinic', 'Trauma Center'],
       default: 'General Hospital'
     },
     address: {
+      type: mongoose.Schema.Types.Mixed,
+      default: ''
+    },
+    phone: {
       type: String,
       trim: true,
-      default: ''
+      default: '+91 22 2456 7890'
+    },
+    email: {
+      type: String,
+      trim: true,
+      default: 'admin@medx-hospital.org'
+    },
+    emergencyContact: {
+      type: String,
+      trim: true,
+      default: '+91 22 2456 0911'
+    },
+    operatingHours: {
+      type: String,
+      default: '24/7 Emergency & Inpatient, Outpatient: 08:00 AM - 08:00 PM'
+    },
+    licenseNumber: {
+      type: String,
+      default: 'MH-MEDX-HOSP-2026-8819'
     },
     totalBeds: {
       type: Number,
@@ -41,9 +69,14 @@ const hospitalSchema = new mongoose.Schema(
       type: Number,
       default: 10
     },
+    bedCapacity: {
+      total: { type: Number, default: 100 },
+      occupied: { type: Number, default: 60 },
+      icuAvailable: { type: Number, default: 10 }
+    },
     departments: {
       type: [String],
-      default: ['Emergency', 'General Medicine', 'Cardiology', 'Pathology']
+      default: ['Emergency', 'General Medicine', 'Cardiology', 'Pathology', 'Intensive Care (ICU)', 'Orthopedics']
     }
   },
   {
@@ -60,3 +93,4 @@ const hospitalSchema = new mongoose.Schema(
 
 export const Hospital = mongoose.model('Hospital', hospitalSchema);
 export default Hospital;
+
