@@ -2,6 +2,7 @@ import { Router } from 'express';
 import authRoutes from './authRoutes.js';
 import reportRoutes from './reportRoutes.js';
 import whatIfRoutes from './whatIfRoutes.js';
+import doctorRoutes from './doctorRoutes.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/roleGuard.js';
 
@@ -74,8 +75,8 @@ patientRouter.all('*', (req, res) => {
 router.use('/patient', patientRouter);
 router.use('/reports', reportRoutes);
 
-// Reserved Domain Route Trees (Established per Phase 1C Contract)
-router.use('/doctor', createReservedDomainRouter('doctor'));
+// Doctor Domain Routes (Migrated in Phase 1F)
+router.use('/doctor', doctorRoutes);
 router.use('/hospital', createReservedDomainRouter('hospital'));
 router.use('/lab', createReservedDomainRouter('lab'));
 router.use('/appointments', createReservedDomainRouter('appointments'));

@@ -5,3 +5,4 @@ export { Hospital } from './Hospital.js';
 export { Lab } from './Lab.js';
 export { MedicalReport } from './MedicalReport.js';
 export { ChatHistory } from './ChatHistory.js';
+export { Prescription } from './Prescription.js';

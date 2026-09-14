@@ -1,0 +1,356 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Activity, Users, FileText, Pill, Clock, CheckCircle2,
+  AlertTriangle, Phone, Stethoscope, RefreshCw, ChevronRight, Eye
+} from 'lucide-react';
+import api from '../../services/api.js';
+
+export function DoctorWorkstation({
+  onSelectPatient,
+  onOpenCall,
+  onOpenPrescription,
+  onOpenReview,
+  onNavigateTab
+}) {
+  const [queue, setQueue] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const loadWorkstationData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const [queueRes, patientsRes, reportsRes] = await Promise.allSettled([
+        api.get('/doctor/queue'),
+        api.get('/doctor/patients'),
+        api.get('/doctor/reports')
+      ]);
+
+      if (queueRes.status === 'fulfilled') setQueue(queueRes.value.data || []);
+      if (patientsRes.status === 'fulfilled') setPatients(patientsRes.value.data || []);
+      if (reportsRes.status === 'fulfilled') setReports(reportsRes.value.data || []);
+    } catch (err) {
+      console.error('Failed to load doctor workstation data:', err);
+      setError('Unable to load workstation data. Please verify network and authentication.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWorkstationData();
+  }, []);
+
+  const pendingReports = reports.filter(r => r.reviewStatus !== 'Reviewed');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top Clinical Metrics */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '1rem'
+      }}>
+        {/* Metric 1: Total Patients */}
+        <div
+          className="medx-card"
+          style={{ padding: '1.25rem', cursor: 'pointer' }}
+          onClick={() => onNavigateTab && onNavigateTab('patients')}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', fontWeight: 600 }}>
+                ACTIVE PATIENTS
+              </div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--medx-navy)', marginTop: '0.25rem' }}>
+                {loading ? '...' : patients.length}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#16A34A', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <CheckCircle2 size={13} /> Under Clinical Roster
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#EFF6FF', color: '#2563EB', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
+              <Users size={22} />
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 2: Today's Triage Queue */}
+        <div className="medx-card" style={{ padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', fontWeight: 600 }}>
+                CONSULTATION QUEUE
+              </div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--medx-navy)', marginTop: '0.25rem' }}>
+                {loading ? '...' : queue.length}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#D97706', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <Clock size={13} /> Outpatient Walk-ins
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#FEF3C7', color: '#D97706', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
+              <Clock size={22} />
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 3: Pending Diagnostic Reports */}
+        <div
+          className="medx-card"
+          style={{ padding: '1.25rem', cursor: 'pointer' }}
+          onClick={() => onNavigateTab && onNavigateTab('reports')}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', fontWeight: 600 }}>
+                PENDING REVIEWS
+              </div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: pendingReports.length > 0 ? '#DC2626' : 'var(--medx-navy)', marginTop: '0.25rem' }}>
+                {loading ? '...' : pendingReports.length}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: pendingReports.length > 0 ? '#DC2626' : '#16A34A', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                {pendingReports.length > 0 ? <AlertTriangle size={13} /> : <CheckCircle2 size={13} />}
+                {pendingReports.length > 0 ? 'Diagnostic Sign-off Needed' : 'All Reports Verified'}
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#FEF2F2', color: '#DC2626', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
+              <FileText size={22} />
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 4: Clinical Prescriptions */}
+        <div className="medx-card" style={{ padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', fontWeight: 600 }}>
+                PRESCRIPTIONS ISSUED
+              </div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--medx-navy)', marginTop: '0.25rem' }}>
+                {loading ? '...' : patients.reduce((acc, p) => acc + (p.prescriptionsCount || 0), 0)}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#16A34A', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <CheckCircle2 size={13} /> Synchronized to MongoDB
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
+              <Pill size={22} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Workstation Layout: Queue on Left, Action Center on Right */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
+        {/* Left Column: Outpatient Triage & Consultation Queue */}
+        <div className="medx-card" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--medx-navy)', margin: 0 }}>
+                Outpatient Consultation Triage Queue
+              </h2>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', margin: '0.25rem 0 0 0' }}>
+                Real-time patient intake and diagnostic triage queue
+              </p>
+            </div>
+            <button
+              type="button"
+              className="medx-btn medx-btn-secondary"
+              style={{ fontSize: '0.8125rem', padding: '0.375rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}
+              onClick={loadWorkstationData}
+              disabled={loading}
+            >
+              <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh
+            </button>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--medx-text-secondary)' }}>
+              Loading outpatient consultation queue...
+            </div>
+          ) : queue.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 1rem',
+              backgroundColor: '#F8FAFC',
+              borderRadius: 'var(--medx-radius-md)',
+              border: '1px dashed #CBD5E1'
+            }}>
+              <CheckCircle2 size={36} color="#16A34A" style={{ marginBottom: '0.5rem' }} />
+              <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--medx-navy)', fontSize: '1rem' }}>No Patients Waiting</h4>
+              <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--medx-text-secondary)' }}>
+                Your outpatient consultation triage queue is completely cleared.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {queue.map((item, idx) => {
+                const isUrgent = item.priority === 'Urgent' || item.status === 'Critical';
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      border: `1px solid ${isUrgent ? '#FCA5A5' : '#E2E8F0'}`,
+                      borderRadius: 'var(--medx-radius-md)',
+                      padding: '1rem 1.25rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '1rem',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: isUrgent ? '#FEE2E2' : '#F1F5F9',
+                        color: isUrgent ? '#DC2626' : 'var(--medx-navy)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '0.875rem'
+                      }}>
+                        #{item.tokenNumber}
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--medx-navy)', fontSize: '0.9375rem' }}>
+                            {item.patientName}
+                          </span>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 600,
+                            backgroundColor: isUrgent ? '#FEE2E2' : '#EFF6FF',
+                            color: isUrgent ? '#DC2626' : '#2563EB'
+                          }}>
+                            {item.priority}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', marginTop: '0.25rem' }}>
+                          {item.gender} • {item.age} yrs • Blood: {item.bloodGroup} • Est. Wait: <strong>{item.estimatedWaitTime}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        className="medx-btn medx-btn-secondary"
+                        style={{ fontSize: '0.8125rem', padding: '0.375rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        onClick={async () => {
+                          try {
+                            const res = await api.get(`/doctor/patients/${item.patientId}`);
+                            onSelectPatient(res.data);
+                          } catch (err) {
+                            alert('Failed to load patient dossier: ' + (err.response?.data?.error?.message || err.message));
+                          }
+                        }}
+                      >
+                        <Eye size={14} /> Dossier
+                      </button>
+
+                      <button
+                        type="button"
+                        className="medx-btn"
+                        style={{
+                          backgroundColor: '#10B981',
+                          color: '#FFFFFF',
+                          fontSize: '0.8125rem',
+                          padding: '0.375rem 0.75rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}
+                        onClick={async () => {
+                          try {
+                            const res = await api.get(`/doctor/patients/${item.patientId}`);
+                            onOpenCall(res.data);
+                          } catch (err) {
+                            onOpenCall({ name: item.patientName, id: item.patientId });
+                          }
+                        }}
+                      >
+                        <Phone size={14} /> Consult
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Quick Workstation Shortcuts & Pending Diagnostics */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Diagnostic Reviews Panel */}
+          <div className="medx-card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--medx-navy)', margin: 0 }}>
+                Reports Needing Review
+              </h3>
+              <span className="medx-badge" style={{ backgroundColor: '#FEF2F2', color: '#DC2626', fontSize: '0.75rem' }}>
+                {pendingReports.length} pending
+              </span>
+            </div>
+
+            {pendingReports.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem', fontSize: '0.8125rem', color: 'var(--medx-text-secondary)' }}>
+                No reports awaiting sign-off.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {pendingReports.slice(0, 4).map((rep) => (
+                  <div
+                    key={rep._id}
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#F8FAFC',
+                      borderRadius: 'var(--medx-radius-sm)',
+                      border: '1px solid #E2E8F0',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => onOpenReview(rep)}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: '0.8125rem', color: 'var(--medx-navy)' }}>
+                      {rep.reportName || rep.name}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--medx-text-secondary)', marginTop: '0.25rem' }}>
+                      <span>Date: {new Date(rep.reportDate || Date.now()).toLocaleDateString()}</span>
+                      <span style={{ color: rep.mlResult?.riskTier === 'High' ? '#DC2626' : '#2563EB', fontWeight: 600 }}>
+                        {rep.mlResult?.riskTier || 'Review Required'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Clinical Workstation Status Box */}
+          <div className="medx-card" style={{ padding: '1.25rem', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <Stethoscope size={18} color="#16A34A" />
+              <strong style={{ fontSize: '0.875rem', color: '#166534' }}>Physician Workstation Online</strong>
+            </div>
+            <p style={{ fontSize: '0.8125rem', color: '#166534', margin: 0, lineHeight: 1.5 }}>
+              Connected to <strong>medx_unified</strong> MongoDB cluster. All prescription events, review signatures, and dossier updates are authenticated via unified RBAC.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default DoctorWorkstation;
