@@ -1,0 +1,24 @@
+{
+  "name": "medx-unified",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unified Med-X Healthcare Platform Monorepo",
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "echo \"Phase 1A: Integration workspace initialized. Run Phase 1B+ for application deployment.\"",
+    "test": "echo \"Phase 1A: Tests configured in subsequent phases.\""
+  },
+  "keywords": [
+    "medx",
+    "healthcare",
+    "triage",
+    "telemedicine",
+    "integration"
+  ],
+  "author": "Med-X Engineering Team",
+  "license": "UNLICENSED"
+}
