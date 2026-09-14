@@ -4,6 +4,7 @@ import reportRoutes from './reportRoutes.js';
 import whatIfRoutes from './whatIfRoutes.js';
 import doctorRoutes from './doctorRoutes.js';
 import hospitalRoutes from './hospitalRoutes.js';
+import labRoutes from './labRoutes.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/roleGuard.js';
 
@@ -82,7 +83,9 @@ router.use('/doctor', doctorRoutes);
 // Hospital Domain Routes (Migrated in Phase 1G)
 router.use('/hospital', hospitalRoutes);
 
-router.use('/lab', createReservedDomainRouter('lab'));
+// Laboratory Domain Routes (Migrated in Phase 1H)
+router.use('/lab', labRoutes);
+
 router.use('/appointments', createReservedDomainRouter('appointments'));
 router.use('/triage', createReservedDomainRouter('triage'));
 

@@ -13,9 +13,10 @@ function generateToken(user, profile = {}) {
     email: user.email,
     role: user.role,
     name: user.name,
-    patientId: user.role === 'patient' && profile._id ? profile._id.toString() : null,
-    doctorId: user.role === 'doctor' && profile._id ? profile._id.toString() : null,
-    hospitalId: user.role === 'hospital_admin' && profile._id ? profile._id.toString() : (profile.hospitalId ? profile.hospitalId.toString() : null)
+    patientId: user.role === 'patient' && profile?._id ? profile._id.toString() : null,
+    doctorId: user.role === 'doctor' && profile?._id ? profile._id.toString() : null,
+    hospitalId: user.role === 'hospital_admin' && profile?._id ? profile._id.toString() : (profile?.hospitalId ? profile.hospitalId.toString() : null),
+    labId: user.role === 'lab_admin' && profile?._id ? profile._id.toString() : null
   };
 
   return jwt.sign(payload, config.JWT_SECRET, {

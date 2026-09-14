@@ -54,6 +54,33 @@ const medicalReportSchema = new mongoose.Schema(
       default: null,
       index: true
     },
+    labName: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    status: {
+      type: String,
+      enum: ['Draft', 'Finalized', 'Completed'],
+      default: 'Finalized'
+    },
+    sampleCollectedAt: {
+      type: Date,
+      default: null
+    },
+    finalizedAt: {
+      type: Date,
+      default: null
+    },
+    finalizedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    notes: {
+      type: String,
+      default: ''
+    },
     reportName: {
       type: String,
       default: 'Complete Blood Biomarker Analysis',

@@ -24,10 +24,40 @@ const labSchema = new mongoose.Schema(
       trim: true,
       default: ''
     },
+    code: {
+      type: String,
+      sparse: true,
+      trim: true
+    },
+    hospitalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hospital',
+      default: null,
+      index: true
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    email: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    contactPerson: {
+      type: String,
+      trim: true,
+      default: ''
+    },
     accreditation: {
       type: String,
       trim: true,
-      default: 'NABL Accredited'
+      default: 'NABL & CAP Accredited'
+    },
+    turnaroundHours: {
+      type: Number,
+      default: 4
     },
     address: {
       type: String,
@@ -46,6 +76,22 @@ const labSchema = new mongoose.Schema(
     }
   }
 );
+
+// Virtual for name to match hospital source baseline
+labSchema.virtual('name').get(function () {
+  return this.labName;
+}).set(function (v) {
+  this.labName = v;
+});
+
+// Virtual for contact object to match hospital source baseline
+labSchema.virtual('contact').get(function () {
+  return {
+    phone: this.phone,
+    email: this.email,
+    address: this.address
+  };
+});
 
 export const Lab = mongoose.model('Lab', labSchema);
 export default Lab;
