@@ -8,4 +8,5 @@ export { ChatHistory } from './ChatHistory.js';
 export { Prescription } from './Prescription.js';
 export { Bed } from './Bed.js';
 export { CareTask } from './CareTask.js';
+export { EmergencyAlert } from './EmergencyAlert.js';
 

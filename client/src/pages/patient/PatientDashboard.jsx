@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api.js';
+import emergencyService from '../../services/emergencyService.js';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine
 } from 'recharts';
 import {
   Activity, ShieldCheck, ShieldAlert, Heart, AlertTriangle,
-  Calendar, FileText, ChevronRight, TrendingUp, Info, RefreshCw, Eye, X
+  Calendar, FileText, ChevronRight, TrendingUp, Info, RefreshCw, Eye, X, MapPin, CheckCircle
 } from 'lucide-react';
 
 const BIOMARKER_SPECS = {
@@ -65,6 +66,24 @@ export default function PatientDashboard({ onNavigateToEntry }) {
   const [chartMode, setChartMode] = useState('normalized'); // 'normalized' | 'individual'
   const [selectedBiomarker, setSelectedBiomarker] = useState('glucose_fasting');
 
+  // Emergency SOS State
+  const [activeSosAlert, setActiveSosAlert] = useState(null);
+  const [sosSending, setSosSending] = useState(false);
+  const [sosSuccess, setSosSuccess] = useState('');
+  const [sosError, setSosError] = useState('');
+
+  const fetchSOSAlert = async () => {
+    try {
+      const alerts = await emergencyService.getEmergencyAlerts();
+      if (Array.isArray(alerts)) {
+        const active = alerts.find(a => a.status === 'ACTIVE' || a.status === 'IN_PROGRESS');
+        setActiveSosAlert(active || null);
+      }
+    } catch (err) {
+      console.warn('[SOS] Could not poll emergency status:', err.message);
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -75,6 +94,7 @@ export default function PatientDashboard({ onNavigateToEntry }) {
       ]);
       setReports(reportsRes.data || []);
       setTrends(trendsRes.data || []);
+      await fetchSOSAlert();
     } catch (err) {
       setError(err.response?.data?.error?.message || err.message || 'Failed to load health records.');
     } finally {
@@ -84,7 +104,68 @@ export default function PatientDashboard({ onNavigateToEntry }) {
 
   useEffect(() => {
     fetchData();
+    // 5-second polling cadence for emergency SOS status synchronization
+    const sosInterval = setInterval(fetchSOSAlert, 5000);
+    return () => clearInterval(sosInterval);
   }, []);
+
+  const handleTriggerSOS = async () => {
+    if (!window.confirm('Send emergency alert to hospital and clinical staff?')) return;
+    setSosSending(true);
+    setSosSuccess('');
+    setSosError('');
+
+    const captureAndSend = async (coords = null) => {
+      try {
+        const payload = {
+          reason: 'Emergency alert triggered from patient dashboard',
+          triggerReason: 'Patient triggered Emergency SOS: Acute physiological distress',
+          alertType: 'Emergency SOS Distress Signal'
+        };
+
+        if (coords) {
+          payload.latitude = coords.latitude;
+          payload.longitude = coords.longitude;
+        }
+
+        const res = await emergencyService.triggerSOS(payload);
+        const createdAlert = res.alert || res.sos;
+        setActiveSosAlert(createdAlert);
+        setSosSuccess('Emergency SOS dispatched! Hospital and clinical staff have been alerted.');
+      } catch (e) {
+        console.error('[SOS] Trigger failed:', e);
+        setSosError(e.response?.data?.error?.message || 'Failed to dispatch Emergency SOS.');
+      } finally {
+        setSosSending(false);
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => captureAndSend({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+        (err) => {
+          console.warn('[SOS] Geolocation unavailable, proceeding with default location:', err.message);
+          captureAndSend(null);
+        },
+        { timeout: 4000 }
+      );
+    } else {
+      captureAndSend(null);
+    }
+  };
+
+  const handleCancelSOS = async () => {
+    if (!activeSosAlert) return;
+    if (!window.confirm('Are you sure you want to cancel this emergency alert?')) return;
+    try {
+      await emergencyService.resolveEmergencyAlert(activeSosAlert._id, 'Cancelled by patient from dashboard.');
+      setActiveSosAlert(null);
+      setSosSuccess('');
+    } catch (e) {
+      console.error('[SOS] Cancel failed:', e);
+      alert('Could not cancel emergency alert: ' + (e.response?.data?.error?.message || e.message));
+    }
+  };
 
   const latestReport = useMemo(() => {
     if (!reports || reports.length === 0) return null;
@@ -159,13 +240,33 @@ export default function PatientDashboard({ onNavigateToEntry }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             onClick={fetchData}
             className="medx-button medx-button-secondary"
             style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 0.875rem', fontSize: '0.8125rem' }}
           >
             <RefreshCw size={15} /> Refresh
+          </button>
+          <button
+            onClick={handleTriggerSOS}
+            disabled={sosSending}
+            className="medx-button"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: '0.5rem 0.875rem',
+              fontSize: '0.8125rem',
+              fontWeight: 700,
+              backgroundColor: '#FEE2E2',
+              color: '#B91C1C',
+              border: '1px solid #FCA5A5',
+              cursor: sosSending ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <AlertTriangle size={15} className={sosSending ? 'animate-spin' : ''} />
+            <span>{sosSending ? 'Dispatching SOS...' : 'Emergency SOS'}</span>
           </button>
           {onNavigateToEntry && (
             <button
@@ -178,6 +279,123 @@ export default function PatientDashboard({ onNavigateToEntry }) {
           )}
         </div>
       </div>
+
+      {/* Active Emergency Alert Banner */}
+      {activeSosAlert && (
+        <div
+          className="medx-card"
+          style={{
+            backgroundColor: '#FFF1F2',
+            border: '2px solid #FDA4AF',
+            padding: '1.25rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#E11D48',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <AlertTriangle size={22} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <strong style={{ fontSize: '1rem', color: '#881337' }}>
+                  ACTIVE EMERGENCY SOS BROADCAST
+                </strong>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '9999px',
+                    backgroundColor: activeSosAlert.status === 'IN_PROGRESS' ? '#FEF3C7' : '#FFE4E6',
+                    color: activeSosAlert.status === 'IN_PROGRESS' ? '#B45309' : '#BE123C'
+                  }}
+                >
+                  {activeSosAlert.status === 'IN_PROGRESS' ? 'IN PROGRESS / DISPATCHED' : 'AWAITING CLINICAL RESPONSE'}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#9F1239', fontWeight: 600 }}>
+                  ID: {activeSosAlert.alertId || activeSosAlert._id}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.8125rem', color: '#9F1239', margin: '0.25rem 0 0 0' }}>
+                {activeSosAlert.triggerReason || 'Acute physiological distress signal transmitted to hospital and attending physician.'}
+              </p>
+              {activeSosAlert.location?.coordinatesText && (
+                <div style={{ fontSize: '0.75rem', color: '#BE123C', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                  <MapPin size={13} /> GPS Coordinates: {activeSosAlert.location.coordinatesText} ({activeSosAlert.location.address})
+                </div>
+              )}
+              {activeSosAlert.dispatch?.statusText && (
+                <div style={{ fontSize: '0.75rem', color: '#047857', marginTop: '0.25rem', fontWeight: 600 }}>
+                  Clinical Note: {activeSosAlert.dispatch.statusText} {activeSosAlert.dispatch.dispatchNotes ? `— ${activeSosAlert.dispatch.dispatchNotes}` : ''}
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleCancelSOS}
+            className="medx-button medx-button-secondary"
+            style={{ fontSize: '0.75rem', padding: '0.375rem 0.75rem', color: '#881337', borderColor: '#FDA4AF' }}
+          >
+            Cancel / Mark Resolved
+          </button>
+        </div>
+      )}
+
+      {/* SOS Notification Success feedback if alert recently resolved */}
+      {sosSuccess && !activeSosAlert && (
+        <div
+          style={{
+            backgroundColor: '#ECFDF5',
+            border: '1px solid #A7F3D0',
+            color: '#065F46',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--medx-radius-md)',
+            fontSize: '0.8125rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <CheckCircle size={16} />
+          <span>{sosSuccess}</span>
+        </div>
+      )}
+
+      {/* SOS Error notification */}
+      {sosError && (
+        <div
+          style={{
+            backgroundColor: '#FFF1F2',
+            border: '1px solid #FDA4AF',
+            color: '#9F1239',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--medx-radius-md)',
+            fontSize: '0.8125rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <AlertTriangle size={16} />
+          <span>{sosError}</span>
+        </div>
+      )}
 
       {/* 5 Core Biomarker Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>

@@ -1,20 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
   ShieldCheck, Stethoscope, Users, FileText, Activity,
-  Clock, Pill, Phone
+  Clock, Pill, Phone, AlertTriangle
 } from 'lucide-react';
 import DoctorWorkstation from '../doctor/DoctorWorkstation.jsx';
 import DoctorPatients from '../doctor/DoctorPatients.jsx';
 import DoctorReports from '../doctor/DoctorReports.jsx';
+import DoctorEmergency from '../doctor/DoctorEmergency.jsx';
 import DoctorPatientModal from '../doctor/DoctorPatientModal.jsx';
 import DoctorPrescriptionModal from '../doctor/DoctorPrescriptionModal.jsx';
 import DoctorCallModal from '../doctor/DoctorCallModal.jsx';
 import DoctorReportReviewModal from '../doctor/DoctorReportReviewModal.jsx';
+import emergencyService from '../../services/emergencyService.js';
 
 export function DoctorWorkspace() {
   const { user, profile, role } = useAuth();
-  const [activeTab, setActiveTab] = useState('workstation'); // 'workstation' | 'patients' | 'reports'
+  const [activeTab, setActiveTab] = useState('workstation'); // 'workstation' | 'patients' | 'reports' | 'emergency'
+  const [activeSosCount, setActiveSosCount] = useState(0);
+
+  // Poll active emergency alerts count every 5s
+  useEffect(() => {
+    const pollSos = async () => {
+      try {
+        const res = await emergencyService.getActiveCount();
+        if (res && typeof res.activeCount === 'number') {
+          setActiveSosCount(res.activeCount);
+        }
+      } catch (err) {
+        // quiet ignore for badge polling
+      }
+    };
+    pollSos();
+    const interval = setInterval(pollSos, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Modal states
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -142,6 +162,40 @@ export function DoctorWorkspace() {
           <FileText size={18} />
           Report Reviews
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('emergency')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'emergency' ? '#E11D48' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'emergency' ? '2px solid #E11D48' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <AlertTriangle size={18} />
+          Emergency SOS Desk
+          {activeSosCount > 0 && (
+            <span style={{
+              backgroundColor: '#E11D48',
+              color: '#FFFFFF',
+              borderRadius: '9999px',
+              padding: '0.1rem 0.45rem',
+              fontSize: '0.75rem',
+              fontWeight: 800
+            }}>
+              {activeSosCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Tab Panels */}
@@ -166,6 +220,13 @@ export function DoctorWorkspace() {
       {activeTab === 'reports' && (
         <DoctorReports
           onOpenReview={(r) => setReviewingReport(r)}
+        />
+      )}
+
+      {activeTab === 'emergency' && (
+        <DoctorEmergency
+          onSelectPatient={(p) => setSelectedPatient(p)}
+          onOpenCall={(p) => setCallPatient(p)}
         />
       )}
 

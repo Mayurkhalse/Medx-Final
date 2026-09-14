@@ -15,6 +15,7 @@ export function DoctorWorkstation({
   const [queue, setQueue] = useState([]);
   const [patients, setPatients] = useState([]);
   const [reports, setReports] = useState([]);
+  const [emergencyCount, setEmergencyCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -22,15 +23,19 @@ export function DoctorWorkstation({
     try {
       setLoading(true);
       setError('');
-      const [queueRes, patientsRes, reportsRes] = await Promise.allSettled([
+      const [queueRes, patientsRes, reportsRes, emgRes] = await Promise.allSettled([
         api.get('/doctor/queue'),
         api.get('/doctor/patients'),
-        api.get('/doctor/reports')
+        api.get('/doctor/reports'),
+        api.get('/emergency/stats/active-count')
       ]);
 
       if (queueRes.status === 'fulfilled') setQueue(queueRes.value.data || []);
       if (patientsRes.status === 'fulfilled') setPatients(patientsRes.value.data || []);
       if (reportsRes.status === 'fulfilled') setReports(reportsRes.value.data || []);
+      if (emgRes.status === 'fulfilled' && emgRes.value.data) {
+        setEmergencyCount(emgRes.value.data.activeCount || 0);
+      }
     } catch (err) {
       console.error('Failed to load doctor workstation data:', err);
       setError('Unable to load workstation data. Please verify network and authentication.');
@@ -138,6 +143,34 @@ export function DoctorWorkstation({
             </div>
             <div style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
               <Pill size={22} />
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 5: Emergency Alerts */}
+        <div
+          className="medx-card"
+          style={{
+            padding: '1.25rem',
+            cursor: 'pointer',
+            borderLeft: emergencyCount > 0 ? '4px solid #E11D48' : 'none'
+          }}
+          onClick={() => onNavigateTab && onNavigateTab('emergency')}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', fontWeight: 600 }}>
+                EMERGENCY SOS DESK
+              </div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: emergencyCount > 0 ? '#E11D48' : 'var(--medx-navy)', marginTop: '0.25rem' }}>
+                {loading ? '...' : emergencyCount}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: emergencyCount > 0 ? '#E11D48' : '#64748B', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <AlertTriangle size={13} /> {emergencyCount > 0 ? 'Urgent SOS Broadcasts' : 'All Clear / Monitoring'}
+              </div>
+            </div>
+            <div style={{ backgroundColor: emergencyCount > 0 ? '#FFE4E6' : '#F1F5F9', color: emergencyCount > 0 ? '#E11D48' : '#64748B', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
+              <AlertTriangle size={22} />
             </div>
           </div>
         </div>

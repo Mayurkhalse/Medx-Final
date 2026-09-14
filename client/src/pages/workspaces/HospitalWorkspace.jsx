@@ -1,18 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
   ShieldCheck, Building2, LayoutDashboard,
-  ListOrdered, BedDouble, Users, Stethoscope
+  ListOrdered, BedDouble, Users, Stethoscope, AlertOctagon
 } from 'lucide-react';
 import HospitalDashboard from '../hospital/HospitalDashboard.jsx';
 import HospitalCareQueue from '../hospital/HospitalCareQueue.jsx';
 import HospitalBeds from '../hospital/HospitalBeds.jsx';
 import HospitalPatients from '../hospital/HospitalPatients.jsx';
 import HospitalDoctors from '../hospital/HospitalDoctors.jsx';
+import HospitalEmergency from '../hospital/HospitalEmergency.jsx';
+import emergencyService from '../../services/emergencyService.js';
 
 export function HospitalWorkspace() {
   const { user, profile, role } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'care-queue' | 'beds' | 'patients' | 'doctors'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'care-queue' | 'beds' | 'patients' | 'doctors' | 'emergency'
+  const [activeSosCount, setActiveSosCount] = useState(0);
+
+  // Poll hospital active emergency alerts every 5s
+  useEffect(() => {
+    const pollAlerts = async () => {
+      try {
+        const res = await emergencyService.getActiveCount();
+        if (res && typeof res.activeCount === 'number') {
+          setActiveSosCount(res.activeCount);
+        }
+      } catch (err) {
+        // quiet ignore for badge polling
+      }
+    };
+    pollAlerts();
+    const interval = setInterval(pollAlerts, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="medx-container" style={{ paddingBottom: '3rem' }}>
@@ -177,6 +197,40 @@ export function HospitalWorkspace() {
           <Stethoscope size={18} />
           Physician Roster
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('emergency')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'emergency' ? '#9333EA' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'emergency' ? '2px solid #9333EA' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <AlertOctagon size={18} />
+          Critical Alerts & SOS Desk
+          {activeSosCount > 0 && (
+            <span style={{
+              backgroundColor: '#E11D48',
+              color: '#FFFFFF',
+              borderRadius: '9999px',
+              padding: '0.1rem 0.45rem',
+              fontSize: '0.75rem',
+              fontWeight: 800
+            }}>
+              {activeSosCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Active Tab Content */}
@@ -185,6 +239,7 @@ export function HospitalWorkspace() {
       {activeTab === 'beds' && <HospitalBeds />}
       {activeTab === 'patients' && <HospitalPatients />}
       {activeTab === 'doctors' && <HospitalDoctors />}
+      {activeTab === 'emergency' && <HospitalEmergency />}
     </div>
   );
 }

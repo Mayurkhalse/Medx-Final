@@ -5,6 +5,7 @@ import whatIfRoutes from './whatIfRoutes.js';
 import doctorRoutes from './doctorRoutes.js';
 import hospitalRoutes from './hospitalRoutes.js';
 import labRoutes from './labRoutes.js';
+import emergencyRoutes from './emergencyRoutes.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/roleGuard.js';
 
@@ -85,6 +86,9 @@ router.use('/hospital', hospitalRoutes);
 
 // Laboratory Domain Routes (Migrated in Phase 1H)
 router.use('/lab', labRoutes);
+
+// Emergency Domain Routes (Migrated in Phase 1I)
+router.use('/emergency', emergencyRoutes);
 
 router.use('/appointments', createReservedDomainRouter('appointments'));
 router.use('/triage', createReservedDomainRouter('triage'));
