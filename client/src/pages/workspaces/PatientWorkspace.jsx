@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { ShieldCheck, User, Activity, AlertCircle } from 'lucide-react';
+import { ShieldCheck, User, Activity, FileText, Sparkles } from 'lucide-react';
+import PatientDashboard from '../patient/PatientDashboard.jsx';
+import PatientReportEntry from '../patient/PatientReportEntry.jsx';
+import PatientWhatIf from '../patient/PatientWhatIf.jsx';
 
 export function PatientWorkspace() {
   const { user, profile, role } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'entry' | 'whatif'
 
   return (
-    <div className="medx-container">
-      <div className="medx-card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+    <div className="medx-container" style={{ paddingBottom: '3rem' }}>
+      {/* Patient Workspace Identity Header */}
+      <div className="medx-card" style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               backgroundColor: '#EFF6FF',
@@ -19,11 +24,11 @@ export function PatientWorkspace() {
               <User size={28} />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--medx-navy)' }}>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--medx-navy)', margin: 0 }}>
                 Patient Workspace
               </h1>
-              <p style={{ color: 'var(--medx-text-secondary)', fontSize: '0.875rem' }}>
-                Secure Patient Portal & Biomarker Analytics Boundary
+              <p style={{ color: 'var(--medx-text-secondary)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>
+                Secure Patient Diagnostics, Biomarker Analytics & What-If AI Simulation
               </p>
             </div>
           </div>
@@ -32,37 +37,119 @@ export function PatientWorkspace() {
           </span>
         </div>
 
+        {/* Active Session Identity Strip */}
         <div style={{
           backgroundColor: 'var(--medx-surface-muted)',
-          padding: '1.25rem',
+          padding: '0.875rem 1.25rem',
           borderRadius: 'var(--medx-radius-md)',
-          marginBottom: '1.5rem'
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1.5rem',
+          fontSize: '0.8125rem',
+          color: 'var(--medx-text-secondary)'
         }}>
-          <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.5rem' }}>Active Session Identity:</h3>
-          <ul style={{ listStyle: 'none', fontSize: '0.875rem', color: 'var(--medx-text-secondary)' }}>
-            <li><strong>Canonical User ID:</strong> {user?.id}</li>
-            <li><strong>Full Name:</strong> {user?.name}</li>
-            <li><strong>Email:</strong> {user?.email}</li>
-            <li><strong>Linked Patient ID:</strong> {profile?._id || 'Registered'}</li>
-            <li><strong>Legacy Patient Code:</strong> {profile?.legacyId || 'PAT-Auto'}</li>
-          </ul>
-        </div>
-
-        <div style={{
-          borderLeft: '4px solid var(--medx-primary)',
-          backgroundColor: 'var(--medx-primary-light)',
-          padding: '1rem 1.25rem',
-          borderRadius: '0 var(--medx-radius-md) var(--medx-radius-md) 0'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <AlertCircle size={18} color="var(--medx-primary)" />
-            <strong style={{ color: 'var(--medx-primary)', fontSize: '0.875rem' }}>Phase 1D Foundation Verified</strong>
-          </div>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)' }}>
-            Route protection, RBAC enforcement, and canonical user-profile mapping are active. Diagnostic report upload, Recharts biomarker trendlines, and ML risk prediction UI will be migrated in subsequent controlled phases.
-          </p>
+          <div><strong>User:</strong> {user?.name || 'Patient'} ({user?.email})</div>
+          <div><strong>User ID:</strong> {user?.id}</div>
+          <div><strong>Patient Profile:</strong> {profile?._id || 'Linked'}</div>
+          <div><strong>Legacy ID:</strong> {profile?.legacyId || 'PAT-Auto'}</div>
         </div>
       </div>
+
+      {/* Navigation Tabs */}
+      <div style={{
+        display: 'flex',
+        gap: '0.5rem',
+        marginBottom: '1.5rem',
+        backgroundColor: '#FFFFFF',
+        padding: '0.375rem',
+        borderRadius: 'var(--medx-radius-md)',
+        border: '1px solid var(--medx-border)'
+      }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('dashboard')}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--medx-radius-sm)',
+            border: 'none',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            backgroundColor: activeTab === 'dashboard' ? 'var(--medx-primary-light)' : 'transparent',
+            color: activeTab === 'dashboard' ? 'var(--medx-primary)' : 'var(--medx-text-secondary)',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Activity size={18} />
+          Biomarker Dashboard & Trends
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('entry')}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--medx-radius-sm)',
+            border: 'none',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            backgroundColor: activeTab === 'entry' ? 'var(--medx-primary-light)' : 'transparent',
+            color: activeTab === 'entry' ? 'var(--medx-primary)' : 'var(--medx-text-secondary)',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <FileText size={18} />
+          Log Report (Manual / PDF)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('whatif')}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--medx-radius-sm)',
+            border: 'none',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            backgroundColor: activeTab === 'whatif' ? '#F3E8FF' : 'transparent',
+            color: activeTab === 'whatif' ? '#9333EA' : 'var(--medx-text-secondary)',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Sparkles size={18} />
+          What-If Health Simulator
+        </button>
+      </div>
+
+      {/* Tab Panels */}
+      {activeTab === 'dashboard' && (
+        <PatientDashboard onNavigateToEntry={() => setActiveTab('entry')} />
+      )}
+
+      {activeTab === 'entry' && (
+        <PatientReportEntry onReportCreated={() => setActiveTab('dashboard')} />
+      )}
+
+      {activeTab === 'whatif' && (
+        <PatientWhatIf />
+      )}
     </div>
   );
 }

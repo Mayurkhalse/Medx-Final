@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './authRoutes.js';
+import reportRoutes from './reportRoutes.js';
+import whatIfRoutes from './whatIfRoutes.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/roleGuard.js';
 
@@ -49,9 +51,30 @@ function createReservedDomainRouter(domainName) {
   return domainRouter;
 }
 
+// Patient Domain Routes (Migrated in Phase 1E)
+const patientRouter = Router();
+patientRouter.use('/reports', reportRoutes);
+patientRouter.use('/whatif', whatIfRoutes);
+patientRouter.get('/', requireAuth, requireRole(['patient']), (req, res) => {
+  res.status(200).json({
+    message: 'Med-X Unified Patient Workspace API',
+    user: { id: req.user._id, name: req.user.name, email: req.user.email, role: req.user.role }
+  });
+});
+patientRouter.all('*', (req, res) => {
+  res.status(501).json({
+    error: {
+      code: 'DOMAIN_RESERVED',
+      domain: 'patient',
+      message: `The patient domain endpoint '${req.originalUrl}' is reserved in the Phase 1D unified foundation. Domain features will be migrated in subsequent implementation phases.`
+    }
+  });
+});
+
+router.use('/patient', patientRouter);
+router.use('/reports', reportRoutes);
+
 // Reserved Domain Route Trees (Established per Phase 1C Contract)
-router.use('/patient', createReservedDomainRouter('patient'));
-router.use('/reports', createReservedDomainRouter('reports'));
 router.use('/doctor', createReservedDomainRouter('doctor'));
 router.use('/hospital', createReservedDomainRouter('hospital'));
 router.use('/lab', createReservedDomainRouter('lab'));
