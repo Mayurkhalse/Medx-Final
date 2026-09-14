@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f5f6fa;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f5f6fa;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Card hover animation */
+.medx-card {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+}
+.medx-card:hover {
+  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.08) !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Stat card glow with purple accent */
+.stat-card-glow {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card-glow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(109, 40, 217, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+}
+
+/* Medical Alert Banner in Lavender (#F3EEFF) */
+.medical-disclaimer-banner {
+  background: #f3eeff;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: #5b21b6;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Table styling adjustments */
+.ant-table-wrapper .ant-table-thead > tr > th {
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  background: #f3eeff !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+/* Kanban column styling */
+.care-queue-column {
+  background-color: #f8f6fc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.care-queue-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.care-queue-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.12);
+  border-color: #c4b5fd;
+}
+
+/* Primary purple button styling */
+.ant-btn-primary {
+  background-color: #6d28d9 !important;
+  border-color: #6d28d9 !important;
+}
+.ant-btn-primary:hover {
+  background-color: #5b21b6 !important;
+  border-color: #5b21b6 !important;
+}

@@ -1,0 +1,6 @@
+.env
+.env.example
+node_modules
+dependencies.md
+DESIGN.md
+ImplementationMedx.md

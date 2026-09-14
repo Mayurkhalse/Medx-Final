@@ -1,0 +1,550 @@
+/* ==========================================================================
+   MedX Design System & Architecture Styles
+   Derived from DESIGN.md (Violet / Ambient Glow) + Clinical Triage Semantics
+   ========================================================================== */
+
+:root {
+  /* Surface & Backgrounds */
+  --bg-0: #f6f7fb;
+  --bg-1: #eef1f8;
+  --surface: #ffffff;
+  --surface-2: #f4f2ff;
+  --surface-border: rgba(148, 163, 184, 0.25);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --text-strong: #111827;
+  --text-muted: #6b7280;
+
+  /* Brand Accents */
+  --accent-1: #6d28d9;       /* Deep Violet */
+  --accent-1-hover: #5b21b6;
+  --accent-1-light: #f3e8ff;
+  --accent-2: #d946ef;       /* Fuchsia / Glow */
+  --accent-3: #f59e0b;       /* Amber Warning */
+  --primary: var(--accent-1);
+  --primary-hover: var(--accent-1-hover);
+  --bg-base: var(--bg-0);
+
+  /* Clinical Flag Tiers */
+  --flag-success: #10b981;
+  --flag-success-light: #ecfdf5;
+  --flag-warning: #f59e0b;
+  --flag-warning-light: #fffbeb;
+  --flag-danger: #ef4444;
+  --flag-danger-light: #fef2f2;
+  --flag-critical: #991b1b;
+  --flag-critical-light: #fee2e2;
+
+  /* Shadows & Rings */
+  --glow: 0 18px 40px rgba(17, 24, 39, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --ring: 0 0 0 3px rgba(109, 40, 217, 0.18);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(900px 450px at 15% -10%, rgba(217, 70, 239, 0.12), transparent 60%),
+    radial-gradient(700px 420px at 85% 10%, rgba(109, 40, 217, 0.10), transparent 60%),
+    linear-gradient(180deg, #f6f7fb 0%, #eef1f8 100%);
+  color: #1f2937;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Shared Components (Buttons, Cards, Inputs, Badges)
+   ========================================================================== */
+
+.card {
+  background-color: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.925rem;
+  font-weight: 600;
+  border: none;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, #5b21b6, #7c3aed);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(109, 40, 217, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(109, 40, 217, 0.35);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  border: 1px solid var(--surface-border);
+  color: var(--text-strong);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--surface-2);
+}
+
+.btn-danger {
+  background-color: var(--flag-danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  background-color: #ffffff;
+  transition: var(--transition);
+}
+
+.form-input:focus {
+  border-color: var(--accent-1);
+  box-shadow: var(--ring);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-low, .badge-normal {
+  background-color: var(--flag-success-light);
+  color: var(--flag-success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-moderate, .badge-warning {
+  background-color: var(--flag-warning-light);
+  color: var(--flag-warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-high, .badge-danger {
+  background-color: var(--flag-danger-light);
+  color: var(--flag-danger);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-critical {
+  background-color: var(--flag-critical-light);
+  color: var(--flag-critical);
+  border: 1px solid rgba(153, 27, 27, 0.3);
+  animation: pulseWarning 2s infinite;
+}
+
+@keyframes pulseWarning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ==========================================================================
+   Patient Portal Sidebar Layout
+   ========================================================================== */
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: var(--surface);
+  border-right: 1px solid var(--surface-border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--accent-1);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.nav-item:hover, .nav-item.active {
+  background-color: var(--surface-2);
+  color: var(--accent-1);
+  font-weight: 600;
+}
+
+.main-content {
+  flex: 1;
+  padding: 36px;
+  overflow-y: auto;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Patient Dashboard Elements */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.parameters-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.parameter-item {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  border: 1px solid var(--surface-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parameter-item.low { border-left: 4px solid var(--flag-warning); background-color: var(--flag-warning-light); }
+.parameter-item.high { border-left: 4px solid var(--flag-danger); background-color: var(--flag-danger-light); }
+.parameter-item.critical_low, .parameter-item.critical_high { border-left: 4px solid var(--flag-critical); background-color: var(--flag-critical-light); }
+.parameter-item.normal { border-left: 4px solid var(--flag-success); background-color: var(--flag-success-light); }
+
+/* Dropzone */
+.dropzone {
+  border: 2px dashed rgba(109, 40, 217, 0.35);
+  border-radius: var(--radius-md);
+  padding: 40px 20px;
+  text-align: center;
+  background-color: var(--surface-2);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dropzone:hover {
+  border-color: var(--accent-1);
+  background-color: #eee9fe;
+}
+
+/* Chat Assistant */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 580px;
+  background-color: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  overflow: hidden;
+}
+
+.chat-history {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-message {
+  max-width: 78%;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  font-size: 0.925rem;
+  line-height: 1.6;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  background: linear-gradient(120deg, #5b21b6, #7c3aed);
+  color: #ffffff;
+}
+
+.chat-message.assistant {
+  align-self: flex-start;
+  background-color: var(--surface-2);
+  color: var(--text-strong);
+  border-left: 4px solid var(--accent-1);
+}
+
+.chat-input-area {
+  display: flex;
+  padding: 16px;
+  border-top: 1px solid var(--surface-border);
+  gap: 12px;
+  background-color: var(--surface);
+}
+
+/* ==========================================================================
+   Hospital & Doctor Top-Nav Layouts
+   ========================================================================== */
+
+.portal-topbar {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--surface-border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.portal-topbar-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.portal-nav-bar {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.portal-nav-links {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.portal-nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.portal-nav-tab:hover {
+  color: var(--accent-1);
+}
+
+.portal-nav-tab.active {
+  color: var(--accent-1);
+  border-bottom-color: var(--accent-1);
+}
+
+.portal-hero-banner {
+  background:
+    radial-gradient(600px 240px at 10% 0%, rgba(217, 70, 239, 0.35), transparent 60%),
+    linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%);
+  color: #ffffff;
+  padding: 28px 32px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(91, 33, 182, 0.2);
+}
+
+.sos-ticker {
+  background: linear-gradient(90deg, #991b1b, #dc2626);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+/* KPI Cards Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background-color: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 8px 0;
+}
+
+.kpi-label {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Data Table */
+.data-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background-color: var(--surface);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th {
+  background-color: #f8fafc;
+  padding: 14px 18px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.data-table td {
+  padding: 16px 18px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.data-table tr:hover td {
+  background-color: var(--surface-2);
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .span-2 {
+    grid-column: span 1;
+  }
+  .app-container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+  }
+}
