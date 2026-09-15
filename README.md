@@ -1,6 +1,6 @@
 # Med-X
 
-Med-X is a unified, full-stack healthcare platform that integrates four core clinical and administrative healthcare domains—**Patients**, **Doctors**, **Hospital Administrators**, and **Diagnostic Laboratories**—into a single monorepo. The platform unifies electronic medical records, biomarker tracking, machine learning-driven physiological risk scoring, outpatient triage, inpatient bed and capacity management, and emergency response.
+Med-X is a unified, full-stack healthcare platform that integrates four core clinical and administrative healthcare domains—**Patients**, **Doctors**, **Hospital Administrators**, and **Diagnostic Laboratories**—into a single monorepo. The platform unifies patient medical records and laboratory reports, biomarker tracking, machine learning-driven physiological risk scoring, outpatient triage, inpatient bed and capacity management, and emergency response.
 
 ---
 
@@ -23,8 +23,8 @@ In traditional healthcare infrastructure, clinical records, patient-facing porta
 - **Outpatient Consultation & Dossier Review**: Physicians review pending diagnostic reports, annotate clinical findings, issue prescriptions, and record patient follow-ups.
 - **Inpatient Bed & ICU Operations Matrix**: Hospital administrators manage live bed occupancy, assign admitted patients to designated units, and track critical capacity across general wards and ICUs.
 - **6-Stage Care Queue Triage Pipeline**: Structured operational task progression (`TRIAGE`, `ADMISSION`, `CONSULTATION`, `LAB_TESTING`, `PROCEDURE`, `DISCHARGE`) synchronized to patient records.
-- **Cross-Role Emergency SOS Lifecycle**: Real-time emergency alert dispatch system allowing patients to broadcast emergency signals with location metadata, which doctors and hospital desks can acknowledge, dispatch ambulances to, and resolve.
-- **Multi-Tenant Role-Based Access Control (RBAC)**: Centralized authentication and authorization with strict tenancy isolation and IDOR protection across roles.
+- **Cross-Role Emergency SOS Lifecycle**: Emergency alert dispatch and status monitoring allowing patients to broadcast emergency signals with location metadata, which doctors and hospital desks can acknowledge, dispatch ambulances to, and resolve via polling-backed desks.
+- **Role-Based Access Control & Data Isolation**: Centralized authentication, role guards, and ownership/affiliation-based authorization preventing unauthorized cross-role and cross-patient data access (IDOR protection).
 - **Safe Account Management**: Self-service profile management and two-step verified account deactivation.
 
 ---
@@ -77,11 +77,11 @@ graph TD
     SPA -- HTTP /api proxy --> Express
     Controllers -- Mongoose ODM --> MongoDB
     MLClient -- HTTP POST /analyze --> FastAPI
-    MLClient -. Fallback on Timeout .-> RefRanges[Authoritative Clinical Reference Ranges]
+    MLClient -. Fallback on Timeout .-> RefRanges[Rule-Based Clinical Reference Ranges]
 ```
 
 ### Architectural Highlights
-- **Resilient ML Boundary**: The Node.js backend communicates with the FastAPI service via HTTP (`POST /analyze`). If the ML microservice is unreachable or times out, the backend automatically falls back to an authoritative clinical reference range algorithm, preventing disruption to report processing.
+- **Resilient ML Service Boundary**: The Node.js backend communicates with the FastAPI microservice via HTTP (`POST /analyze`) for machine learning risk inference. If the ML microservice is unreachable or times out, the backend executes a rule-based clinical reference-range evaluation fallback, calculating standard physiological bounds and ensuring uninterrupted report processing without fabricating ML predictions.
 - **Strict Database Persistence**: The backend mandates a persistent MongoDB database at runtime. Mock and in-memory databases are strictly restricted to isolated automated testing.
 - **Unified Identity Model**: A single canonical `User` identity maps 1-to-1 with role-specific profiles (`Patient`, `Doctor`, `Hospital`, `Lab`), enforcing secure foreign key relationships across medical reports, prescriptions, and alerts.
 
@@ -168,7 +168,7 @@ Ensure the following runtimes are installed on your host system:
 
 - **Node.js**: `v18.0.0` or later (tested on `v20.x`, `v22.x`, `v24.x`)
 - **npm**: `v9.0.0` or later
-- **Python**: `v3.10` or later (tested on `3.10` through `3.14`)
+- **Python**: `v3.10` or later (verified on Python 3.14)
 - **MongoDB**: `v6.0` or later running locally on port `27017`
 - **Git**: `v2.30` or later
 
@@ -314,7 +314,7 @@ To run the complete Med-X system locally, open four terminal windows:
 | Terminal | Step | Command | Local Address |
 | :---: | :--- | :--- | :--- |
 | **1** | Database | `sudo systemctl start mongod` | `localhost:27017` |
-| **2** | ML Microservice | `cd ml_service && source .venv/bin/activate && uvicorn main:app --port 8000 --reload` | `http://127.0.0.1:8000` |
+| **2** | ML Microservice | `cd ml_service && source .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload` | `http://127.0.0.1:8000` |
 | **3** | Express API | `npm run dev:server` | `http://localhost:5000` |
 | **4** | Frontend App | `npm run dev:client` | `http://localhost:5173` |
 
@@ -335,7 +335,7 @@ Med-X implements a stateless JSON Web Token (JWT) architecture:
 
 1. **Registration & Login**:
    - Users register at `/register` or `/login` selecting their role (`patient`, `doctor`, `hospital_admin`, `lab_admin`).
-   - Passwords are encrypted with `bcryptjs` using 10 salt rounds.
+   - Passwords are hashed with `bcryptjs` using 10 salt rounds.
    - Upon successful credentials verification, the server issues a signed JWT containing user ID, email, role, and profile ID.
 2. **Session Handling**:
    - The token is stored in the browser's `localStorage` under the key `medx_token`.
@@ -350,8 +350,8 @@ Med-X implements a stateless JSON Web Token (JWT) architecture:
 ## Main Application Workflows
 
 ### Patient Workflow (`/patient`)
-- **Biomarker Dashboard**: Overview of 5 core metrics with formatted reference ranges and status badges (`OPTIMAL`, `HIGH`, `CRITICAL HIGH`, `PENDING`).
-- **Composite Risk Score**: Autoritative risk score (/100) and risk tier (`Low`, `Moderate`, `High`, `Critical`) synchronized with the ML assessment banner.
+- **Biomarker Dashboard**: Overview of 5 core metrics with individual observation status badges (`OPTIMAL`, `HIGH`, `CRITICAL HIGH`, `PENDING`) based on verified clinical reference ranges.
+- **Composite Risk Score**: Authoritative aggregate risk score (/100) and multi-factorial risk tier (`Low`, `Moderate`, `High`, `Critical`) synchronized with the ML assessment banner, distinct from individual biomarker statuses.
 - **Report Ingestion**:
   - Manual Entry: Direct parameter entry with immediate risk computation.
   - PDF Upload: Document upload with automated biomarker extraction.
@@ -380,7 +380,7 @@ Med-X implements a stateless JSON Web Token (JWT) architecture:
 
 ## Testing
 
-Med-X uses the native Node.js test runner (`node --test`) for fast, isolated, dependency-free automated testing.
+Med-X uses the native Node.js test runner (`node --test`) for automated unit and integration testing.
 
 ### Running Backend Tests
 ```bash
@@ -414,9 +414,13 @@ client/dist/
 ```
 
 ### Running the Production Backend
+Start the Express REST API in production mode:
 ```bash
 npm run start:server
 ```
+
+> [!NOTE]
+> The backend serves `/api` endpoints on port 5000. In a production deployment, the static assets in `client/dist/` are typically served via a reverse proxy (such as Nginx or Caddy) or cloud CDN, forwarding `/api` traffic to the Express backend.
 
 ---
 
@@ -435,7 +439,7 @@ To maintain clinical reliability and architectural clarity, the following bounda
 ## Security & Development Notes
 
 - **Authentication & RBAC**: Every private route is protected by JWT verification and role-specific guards (`patient`, `doctor`, `hospital_admin`, `lab_admin`).
-- **IDOR & Tenancy Isolation**: Patients cannot access foreign medical records; doctors and hospitals can only access records within authorized clinical affiliations.
+- **IDOR & Resource Authorization**: Patients cannot access foreign medical records; doctors and hospitals can only access records within authorized clinical assignments and facility affiliations.
 - **Credential Protection**: Passwords are never stored in plaintext; hashing uses `bcryptjs`. Sensitive configurations are managed strictly via environment variables (`.env`).
 - **Data Encryption**: Data in transit should be secured via HTTPS/TLS in production deployments. Database encryption at rest should be configured via MongoDB WiredTiger storage engine encryption.
 
@@ -466,10 +470,10 @@ To maintain clinical reliability and architectural clarity, the following bounda
 
 ### 4. ML Service Offline Warning
 - **Symptom**: `[ML SERVICE BOUNDARY] ML Service at http://127.0.0.1:8000 unreachable... Executing authoritative clinical reference fallback.`
-- **Solution**: This is a non-fatal warning. The backend will automatically compute valid risk scores using internal clinical reference ranges. To enable the full Random Forest ML service, ensure the FastAPI server is running on port `8000`.
+- **Solution**: This is a non-fatal warning. The backend will automatically evaluate biomarkers using rule-based clinical reference ranges rather than ML inference. To enable the full Random Forest ML service, ensure the FastAPI server is running on port `8000`.
 
 ---
 
 ## License
 
-This project is proprietary and confidential. Unauthorized copying, distribution, or modification is strictly prohibited.
+License: Proprietary / All rights reserved.
