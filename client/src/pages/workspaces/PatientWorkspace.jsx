@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ShieldCheck, User, Activity, FileText, Sparkles } from 'lucide-react';
 import PatientDashboard from '../patient/PatientDashboard.jsx';
@@ -7,7 +8,12 @@ import PatientWhatIf from '../patient/PatientWhatIf.jsx';
 
 export function PatientWorkspace() {
   const { user, profile, role } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'entry' | 'whatif'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'dashboard'; // 'dashboard' | 'entry' | 'whatif' | 'sos'
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   return (
     <div className="medx-container" style={{ paddingBottom: '3rem' }}>
@@ -139,8 +145,8 @@ export function PatientWorkspace() {
       </div>
 
       {/* Tab Panels */}
-      {activeTab === 'dashboard' && (
-        <PatientDashboard onNavigateToEntry={() => setActiveTab('entry')} />
+      {(activeTab === 'dashboard' || activeTab === 'sos') && (
+        <PatientDashboard onNavigateToEntry={() => setActiveTab('entry')} scrollToSos={activeTab === 'sos'} />
       )}
 
       {activeTab === 'entry' && (

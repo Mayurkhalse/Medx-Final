@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
   ShieldCheck, Stethoscope, Users, FileText, Activity,
@@ -19,7 +20,9 @@ import { Calendar } from 'lucide-react';
 
 export function DoctorWorkspace() {
   const { user, profile, role } = useAuth();
-  const [activeTab, setActiveTab] = useState('workstation'); // 'workstation' | 'patients' | 'reports' | 'emergency'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'workstation'; // 'workstation' | 'patients' | 'reports' | 'appointments' | 'availability' | 'emergency'
+  const setActiveTab = (tab) => setSearchParams({ tab });
   const [activeSosCount, setActiveSosCount] = useState(0);
 
   // Poll active emergency alerts count every 5s

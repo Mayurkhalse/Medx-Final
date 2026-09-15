@@ -5,7 +5,9 @@ import {
   getMe,
   logout,
   googleAuth,
-  googleCallback
+  googleCallback,
+  updateProfile,
+  deleteAccount
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -20,7 +22,9 @@ router.post('/logout', logout);
 router.get('/google', googleAuth);
 router.get('/google/callback', googleCallback);
 
-// Protected Authentication Endpoints
+// Protected Authentication & Profile Management Endpoints
 router.get('/me', requireAuth, getMe);
+router.put('/profile', requireAuth, updateProfile);
+router.post('/delete-account', requireAuth, deleteAccount);
 
 export default router;

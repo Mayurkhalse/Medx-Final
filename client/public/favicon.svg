@@ -1,31 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="medxBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="100%" stop-color="#1E293B" />
-    </linearGradient>
-    <linearGradient id="xBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3B82F6" />
-      <stop offset="100%" stop-color="#1D4ED8" />
-    </linearGradient>
-    <linearGradient id="xCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8" />
-      <stop offset="100%" stop-color="#0284C7" />
-    </linearGradient>
-  </defs>
-
-  <!-- Base Rounded Container -->
-  <rect width="64" height="64" rx="14" fill="url(#medxBg)" />
-  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.5" />
-
-  <!-- Medical Cross Accent -->
-  <rect x="30.5" y="8" width="3" height="8" rx="1" fill="#38BDF8" />
-  <rect x="28" y="10.5" width="8" height="3" rx="1" fill="#38BDF8" />
-
-  <!-- Bold Geometric 'M' in White -->
-  <path d="M 8 48.5 V 15.5 H 13.8 L 18.5 28 L 23.3 15.5 H 29.5 V 48.5 H 24.5 V 25 L 19.5 37 H 17.5 L 13 25 V 48.5 Z" fill="#FFFFFF" />
-
-  <!-- Dynamic Geometric 'X' in Med-X Brand Colors -->
-  <line x1="34" y1="15.5" x2="56" y2="48.5" stroke="url(#xBlue)" stroke-width="6" stroke-linecap="round" />
-  <line x1="56" y1="15.5" x2="34" y2="48.5" stroke="url(#xCyan)" stroke-width="6" stroke-linecap="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="8" fill="#7C3AED"/>
+  <path d="M4 16h5.5l3.5-9.5L18.5 25.5 23 16h5" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

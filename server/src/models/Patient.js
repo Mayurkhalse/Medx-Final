@@ -27,6 +27,16 @@ const patientSchema = new mongoose.Schema(
       trim: true,
       default: ''
     },
+    address: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    emergencyContact: {
+      type: String,
+      trim: true,
+      default: ''
+    },
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Hospital',

@@ -7,11 +7,14 @@ import {
 import LabDashboard from '../lab/LabDashboard.jsx';
 import LabReports from '../lab/LabReports.jsx';
 import LabNewReport from '../lab/LabNewReport.jsx';
+import { useSearchParams } from 'react-router-dom';
 import LabProfile from '../lab/LabProfile.jsx';
 
 export function LabWorkspace() {
   const { user, profile, role } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'reports' | 'new_report' | 'profile'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'dashboard'; // 'dashboard' | 'reports' | 'new_report' | 'profile'
+  const setActiveTab = (tab) => setSearchParams({ tab });
   const [selectedReportForView, setSelectedReportForView] = useState(null);
 
   const handleSelectReport = (report) => {

@@ -85,6 +85,37 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Profile update handler
+  const updateProfile = async (profileData) => {
+    try {
+      setError(null);
+      const data = await authService.updateProfile(profileData);
+      if (data.user) setUser(data.user);
+      if (data.profile) setProfile(data.profile);
+      return data;
+    } catch (err) {
+      const msg = err.response?.data?.error?.message || 'Failed to update profile.';
+      setError(msg);
+      throw err;
+    }
+  };
+
+  // Safe account deactivation/deletion handler
+  const deleteAccount = async (confirmation) => {
+    try {
+      setError(null);
+      const res = await authService.deleteAccount(confirmation);
+      setUser(null);
+      setProfile(null);
+      setToken(null);
+      return res;
+    } catch (err) {
+      const msg = err.response?.data?.error?.message || 'Failed to delete account.';
+      setError(msg);
+      throw err;
+    }
+  };
+
   // Logout handler
   const logout = async () => {
     try {
@@ -108,6 +139,8 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    updateProfile,
+    deleteAccount,
     checkAuth
   };
 

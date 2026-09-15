@@ -54,6 +54,15 @@ export async function requireAuth(req, res, next) {
       });
     }
 
+    if (user.isDeactivated) {
+      return res.status(401).json({
+        error: {
+          code: 'ACCOUNT_DEACTIVATED',
+          message: 'This account has been deactivated and is no longer accessible.'
+        }
+      });
+    }
+
     req.user = user;
     req.tokenPayload = decoded;
     next();

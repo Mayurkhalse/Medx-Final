@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-do
 import { useAuth } from '../context/AuthContext.jsx';
 import { Activity, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, Stethoscope, Building2, FlaskConical, User } from 'lucide-react';
 import jankotiLogo from '../assets/jankoti-logo.png';
+import MedXLogo from '../components/MedXLogo.jsx';
 
 export function LoginPage() {
   const [searchParams] = useSearchParams();
@@ -13,6 +14,7 @@ export function LoginPage() {
   const [role, setRole] = useState(initialRole);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -25,7 +27,10 @@ export function LoginPage() {
     if (roleParam && ['patient', 'doctor', 'hospital_admin', 'lab_admin'].includes(roleParam)) {
       setRole(roleParam);
     }
-  }, [searchParams]);
+    if (location.state?.message) {
+      setSuccessMsg(location.state.message);
+    }
+  }, [searchParams, location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,30 +88,15 @@ export function LoginPage() {
         {/* Med-X + Jankoti Branded Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
-            <img
-              src="/favicon.svg"
-              alt="Med-X"
-              style={{ height: '32px', width: '32px', borderRadius: '7px' }}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <span style={{
-              fontSize: '1.65rem',
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
-              color: 'var(--medx-navy)',
-              fontFamily: 'var(--medx-font-display)',
-              lineHeight: 1
-            }}>
-              MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
-            </span>
+            <MedXLogo size="lg" />
 
-            <div style={{ width: '1px', height: '22px', backgroundColor: '#CBD5E1', margin: '0 0.15rem' }} />
+            <div style={{ width: '1px', height: '24px', backgroundColor: '#CBD5E1', margin: '0 0.15rem' }} />
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <img
                 src={jankotiLogo}
                 alt="Jankoti"
-                style={{ height: '22px', width: 'auto', objectFit: 'contain' }}
+                style={{ height: '26px', width: 'auto', objectFit: 'contain' }}
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
@@ -118,6 +108,12 @@ export function LoginPage() {
             Select your healthcare role to access your dedicated workspace
           </p>
         </div>
+
+        {successMsg && (
+          <div className="medx-alert medx-alert-info" style={{ marginBottom: '1.25rem', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1D4ED8', padding: '0.75rem 1rem', borderRadius: '8px', fontSize: '0.875rem' }}>
+            <span>{successMsg}</span>
+          </div>
+        )}
 
         {errorMsg && (
           <div className="medx-alert medx-alert-error" style={{ marginBottom: '1.25rem' }}>

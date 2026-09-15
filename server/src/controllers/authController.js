@@ -188,6 +188,15 @@ export async function login(req, res, next) {
       });
     }
 
+    if (user.isDeactivated) {
+      return res.status(403).json({
+        error: {
+          code: 'ACCOUNT_DEACTIVATED',
+          message: 'This account has been deactivated. Please contact administration.'
+        }
+      });
+    }
+
     // Fetch linked profile
     const profile = await fetchUserProfile(user);
     const token = generateToken(user, profile);
@@ -279,4 +288,111 @@ export async function googleCallback(req, res) {
   });
 }
 
-export default { register, login, getMe, logout, googleAuth, googleCallback };
+/**
+ * Update authenticated user profile
+ */
+export async function updateProfile(req, res, next) {
+  try {
+    const user = req.user;
+    const {
+      name, phone,
+      // patient fields
+      gender, dateOfBirth, bloodGroup, address, emergencyContact,
+      // doctor fields
+      specialty, qualifications, experienceYears, consultationFee, department,
+      // hospital fields
+      facilityName, totalBeds, emergencyUnits,
+      // lab fields
+      labName, accreditation
+    } = req.body;
+
+    // Update canonical user fields
+    if (name && typeof name === 'string' && name.trim()) {
+      user.name = name.trim();
+    }
+    if (phone !== undefined) {
+      user.phone = String(phone).trim();
+    }
+    await user.save();
+
+    // Update linked role profile document
+    const profile = await fetchUserProfile(user);
+    if (profile) {
+      if (user.role === 'patient') {
+        if (gender !== undefined) profile.gender = gender;
+        if (dateOfBirth !== undefined) profile.dateOfBirth = dateOfBirth;
+        if (bloodGroup !== undefined) profile.bloodGroup = bloodGroup;
+        if (address !== undefined) profile.address = address;
+        if (emergencyContact !== undefined) profile.emergencyContact = emergencyContact;
+        await profile.save();
+      } else if (user.role === 'doctor') {
+        if (specialty !== undefined) profile.specialty = specialty;
+        if (qualifications !== undefined) profile.qualification = qualifications;
+        if (req.body.qualification !== undefined) profile.qualification = req.body.qualification;
+        if (experienceYears !== undefined) profile.experienceYears = Number(experienceYears) || profile.experienceYears;
+        if (consultationFee !== undefined) profile.consultationFee = Number(consultationFee) || profile.consultationFee;
+        if (department !== undefined) profile.department = department;
+        if (address !== undefined) profile.address = address;
+        await profile.save();
+      } else if (user.role === 'hospital_admin') {
+        if (facilityName !== undefined) profile.facilityName = facilityName;
+        if (totalBeds !== undefined) profile.totalBeds = Number(totalBeds) || profile.totalBeds;
+        if (emergencyUnits !== undefined) profile.emergencyUnits = Number(emergencyUnits) || profile.emergencyUnits;
+        if (address !== undefined) profile.address = address;
+        await profile.save();
+      } else if (user.role === 'lab_admin') {
+        if (labName !== undefined) profile.labName = labName;
+        if (accreditation !== undefined) profile.accreditation = accreditation;
+        if (address !== undefined) profile.address = address;
+        await profile.save();
+      }
+    }
+
+    return res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone
+      },
+      profile
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Safely delete / deactivate authenticated user account
+ * Preserves multi-party clinical record integrity and regulatory audit trails
+ */
+export async function deleteAccount(req, res, next) {
+  try {
+    const user = req.user;
+    const { confirmation } = req.body;
+
+    if (!confirmation || (confirmation !== 'DELETE' && confirmation !== user.email)) {
+      return res.status(400).json({
+        error: {
+          code: 'CONFIRMATION_REQUIRED',
+          message: 'Explicit confirmation required. Please confirm by providing DELETE or your account email address.'
+        }
+      });
+    }
+
+    // Safely deactivate account to prevent login/access while maintaining clinical audit integrity
+    user.isDeactivated = true;
+    user.deactivatedAt = new Date();
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Account has been safely deactivated. Session terminated.'
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export default { register, login, getMe, logout, googleAuth, googleCallback, updateProfile, deleteAccount };

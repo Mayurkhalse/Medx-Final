@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import jankotiLogo from '../assets/jankoti-logo.png';
+import MedXLogo from './MedXLogo.jsx';
 import { Activity, ShieldCheck, Heart, Stethoscope, Building2, FlaskConical } from 'lucide-react';
 
 export function Footer() {
@@ -30,17 +31,15 @@ export function Footer() {
           flexWrap: 'wrap',
           gap: '0.5rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontWeight: 800, color: 'var(--medx-navy)' }}>
-              MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <MedXLogo size="sm" />
             <span>•</span>
             <span style={{ color: '#64748B' }}>Powered by Jankoti</span>
             <span>•</span>
             <span>Unified Clinical Governance</span>
           </div>
           <div>
-            © {new Date().getFullYear()} Med-X. All rights reserved.
+            © {new Date().getFullYear()} MedX. All rights reserved.
           </div>
         </div>
       </footer>
@@ -66,22 +65,8 @@ export function Footer() {
         }}>
           {/* Brand & Mission Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <img
-                src="/favicon.svg"
-                alt="Med-X"
-                style={{ height: '28px', width: '28px', borderRadius: '6px' }}
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-              <span style={{
-                fontSize: '1.35rem',
-                fontWeight: 800,
-                letterSpacing: '-0.03em',
-                color: '#FFFFFF',
-                fontFamily: 'var(--medx-font-display)'
-              }}>
-                MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <MedXLogo size="lg" />
             </div>
 
             <p style={{

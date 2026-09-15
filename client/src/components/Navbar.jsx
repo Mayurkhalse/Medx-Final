@@ -13,15 +13,39 @@ import {
   Heart,
   Calendar,
   Settings,
-  Clock
+  Clock,
+  Menu,
+  X,
+  Sparkles,
+  FileText,
+  Users,
+  AlertTriangle,
+  LayoutDashboard,
+  ListOrdered,
+  BedDouble,
+  Layers,
+  AlertOctagon,
+  PlusCircle,
+  Edit2,
+  Trash2
 } from 'lucide-react';
+import MedXLogo from './MedXLogo.jsx';
 import jankotiLogo from '../assets/jankoti-logo.png';
+import ViewProfileModal from './ViewProfileModal.jsx';
+import EditProfileModal from './EditProfileModal.jsx';
+import DeleteAccountModal from './DeleteAccountModal.jsx';
 
 export function Navbar() {
   const { user, profile, role, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [viewProfileOpen, setViewProfileOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+
   const menuRef = useRef(null);
 
   // Close dropdown on click outside
@@ -35,10 +59,11 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close dropdown on route change
+  // Close menus on route change
   useEffect(() => {
     setProfileMenuOpen(false);
-  }, [location.pathname]);
+    setMobileMenuOpen(false);
+  }, [location.pathname, location.search]);
 
   const handleLogout = async () => {
     setProfileMenuOpen(false);
@@ -46,23 +71,15 @@ export function Navbar() {
     navigate('/login');
   };
 
-  const getWorkspacePath = () => {
-    switch (role) {
-      case 'patient': return '/patient';
-      case 'doctor': return '/doctor';
-      case 'hospital_admin': return '/hospital';
-      case 'lab_admin': return '/lab';
-      default: return '/';
-    }
-  };
+  const isLandingPage = location.pathname === '/';
 
+  // Role metadata definition
   const getRoleMetadata = () => {
     switch (role) {
       case 'patient':
         return {
           title: 'Personal Health Portal',
           icon: Heart,
-          badgeClass: 'medx-badge-patient',
           color: '#2563EB',
           bg: '#EFF6FF',
           roleDisplay: 'Patient'
@@ -71,7 +88,6 @@ export function Navbar() {
         return {
           title: 'Clinical Workstation',
           icon: Stethoscope,
-          badgeClass: 'medx-badge-doctor',
           color: '#15803D',
           bg: '#F0FDF4',
           roleDisplay: 'Attending Physician'
@@ -80,7 +96,6 @@ export function Navbar() {
         return {
           title: 'Operations Command Center',
           icon: Building2,
-          badgeClass: 'medx-badge-hospital',
           color: '#1E40AF',
           bg: '#EFF6FF',
           roleDisplay: 'Hospital Administrator'
@@ -89,359 +104,539 @@ export function Navbar() {
         return {
           title: 'Diagnostic Laboratory',
           icon: FlaskConical,
-          badgeClass: 'medx-badge-lab',
-          color: '#D97706',
-          bg: '#FEF3C7',
+          color: '#EA580C',
+          bg: '#FFF7ED',
           roleDisplay: 'Laboratory Specialist'
         };
       default:
         return {
           title: 'Connected Health',
           icon: Activity,
-          badgeClass: '',
-          color: '#2563EB',
-          bg: '#EFF6FF',
+          color: '#7C3AED',
+          bg: '#F5F3FF',
           roleDisplay: 'User'
         };
     }
   };
 
   const roleMeta = getRoleMetadata();
-  const RoleIcon = roleMeta.icon;
+
+  // Active workspace navigation items
+  const getRoleNavItems = () => {
+    switch (role) {
+      case 'patient':
+        return [
+          { id: 'dashboard', label: 'Biomarkers', path: '/patient?tab=dashboard', icon: Activity },
+          { id: 'entry', label: 'Reports', path: '/patient?tab=entry', icon: FileText },
+          { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles },
+          { id: 'sos', label: 'Emergency SOS', path: '/patient?tab=sos', icon: AlertTriangle, isAlert: true }
+        ];
+      case 'doctor':
+        return [
+          { id: 'workstation', label: 'Workstation', path: '/doctor?tab=workstation', icon: Activity },
+          { id: 'patients', label: 'Patients', path: '/doctor?tab=patients', icon: Users },
+          { id: 'reports', label: 'Reviews', path: '/doctor?tab=reports', icon: FileText },
+          { id: 'appointments', label: 'Appointments', path: '/doctor?tab=appointments', icon: Calendar },
+          { id: 'availability', label: 'Availability', path: '/doctor?tab=availability', icon: Clock },
+          { id: 'emergency', label: 'SOS Desk', path: '/doctor?tab=emergency', icon: AlertTriangle, isAlert: true }
+        ];
+      case 'hospital_admin':
+        return [
+          { id: 'dashboard', label: 'Dashboard', path: '/hospital?tab=dashboard', icon: LayoutDashboard },
+          { id: 'care-queue', label: 'Care Queue', path: '/hospital?tab=care-queue', icon: ListOrdered },
+          { id: 'beds', label: 'Beds & ICU', path: '/hospital?tab=beds', icon: BedDouble },
+          { id: 'patients', label: 'Inpatients', path: '/hospital?tab=patients', icon: Users },
+          { id: 'doctors', label: 'Physicians', path: '/hospital?tab=doctors', icon: Stethoscope },
+          { id: 'departments', label: 'Departments', path: '/hospital?tab=departments', icon: Layers },
+          { id: 'profile-settings', label: 'Facility', path: '/hospital?tab=profile-settings', icon: Settings },
+          { id: 'emergency', label: 'Critical SOS', path: '/hospital?tab=emergency', icon: AlertOctagon, isAlert: true }
+        ];
+      case 'lab_admin':
+        return [
+          { id: 'dashboard', label: 'Worklist', path: '/lab?tab=dashboard', icon: LayoutDashboard },
+          { id: 'reports', label: 'Diagnostic Reports', path: '/lab?tab=reports', icon: FileText },
+          { id: 'new_report', label: 'New Report', path: '/lab?tab=new_report', icon: PlusCircle },
+          { id: 'profile', label: 'Facility Profile', path: '/lab?tab=profile', icon: Building2 }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const navItems = getRoleNavItems();
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : 'dashboard');
 
   return (
-    <header style={{
-      background: 'rgba(255, 255, 255, 0.96)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      borderBottom: '1px solid rgba(148, 163, 184, 0.25)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 50,
-      height: '68px',
-      boxShadow: '0 2px 12px rgba(15, 23, 42, 0.04)',
-      transition: 'all 0.2s ease'
-    }}>
-      <div className="medx-container" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '100%'
+    <>
+      <header style={{
+        background: 'rgba(255, 255, 255, 0.97)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(148, 163, 184, 0.25)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        height: '68px',
+        boxShadow: '0 2px 12px rgba(15, 23, 42, 0.04)',
+        transition: 'all 0.2s ease'
       }}>
-        {/* LEFT: Authoritative Brand Lockup (MED-X | Jankoti) */}
-        <Link
-          to="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            textDecoration: 'none',
-            flexShrink: 0,
-            whiteSpace: 'nowrap'
-          }}
-          aria-label="Med-X Home"
-        >
-          {/* Med-X Identity (Primary Product Brand) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
-            <img
-              src="/favicon.svg"
-              alt="Med-X"
-              style={{
-                height: '28px',
-                width: '28px',
-                display: 'block',
-                borderRadius: '6px',
-                flexShrink: 0
-              }}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-            <span style={{
-              fontSize: '1.35rem',
-              fontWeight: 800,
-              letterSpacing: '-0.035em',
-              color: 'var(--medx-navy)',
-              fontFamily: 'var(--medx-font-display)',
-              lineHeight: 1,
+        <div className="medx-container" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: '100%',
+          gap: '1rem'
+        }}>
+          {/* LEFT: Authoritative Brand Lockup ([MedX] | [Jankoti]) */}
+          <Link
+            to="/"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.65rem',
+              textDecoration: 'none',
+              flexShrink: 0,
               whiteSpace: 'nowrap'
+            }}
+            aria-label="Med-X Home"
+          >
+            {/* MedX Authoritative Identity */}
+            <MedXLogo size="md" />
+
+            {/* Subtle Vertical Divider */}
+            <div style={{
+              width: '1px',
+              height: '20px',
+              backgroundColor: '#CBD5E1',
+              margin: '0 0.15rem',
+              flexShrink: 0
+            }} />
+
+            {/* Jankoti Association (Exactly Once, 24px visual height, authentic asset) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              flexShrink: 0
             }}>
-              MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
-            </span>
-          </div>
-
-          {/* Subtle Vertical Divider */}
-          <div style={{
-            width: '1px',
-            height: '20px',
-            backgroundColor: '#CBD5E1',
-            margin: '0 0.1rem',
-            flexShrink: 0
-          }} />
-
-          {/* Jankoti Association (Appears Exactly Once, No duplicate text) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexShrink: 0
-          }}>
-            <img
-              src={jankotiLogo}
-              alt="Jankoti"
-              style={{
-                height: '22px',
-                width: 'auto',
-                display: 'block',
-                objectFit: 'contain'
-              }}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          </div>
-        </Link>
-
-        {/* CENTER: Contextual Role Workspace Indicator (when authenticated) */}
-        {isAuthenticated && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            backgroundColor: roleMeta.bg,
-            padding: '0.35rem 0.85rem',
-            borderRadius: '9999px',
-            border: `1px solid ${roleMeta.color}25`
-          }}>
-            <RoleIcon size={16} color={roleMeta.color} />
-            <span style={{
-              fontSize: '0.8125rem',
-              fontWeight: 700,
-              color: roleMeta.color,
-              letterSpacing: '0.01em'
-            }}>
-              {roleMeta.title}
-            </span>
-          </div>
-        )}
-
-        {/* RIGHT: Profile & Account Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {isAuthenticated ? (
-            <div ref={menuRef} style={{ position: 'relative' }}>
-              {/* Profile Menu Trigger */}
-              <button
-                type="button"
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              <img
+                src={jankotiLogo}
+                alt="Jankoti"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.625rem',
-                  padding: '0.35rem 0.65rem 0.35rem 0.45rem',
-                  backgroundColor: profileMenuOpen ? 'var(--medx-surface-muted)' : 'transparent',
-                  border: '1px solid var(--medx-border)',
-                  borderRadius: 'var(--medx-radius-md)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  height: '24px',
+                  width: 'auto',
+                  display: 'block',
+                  objectFit: 'contain'
                 }}
-                aria-expanded={profileMenuOpen}
-                aria-label="Account Menu"
-              >
-                {/* User Avatar Circle */}
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  backgroundColor: roleMeta.color,
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: '0.875rem'
-                }}>
-                  {user?.name?.charAt(0) || 'U'}
-                </div>
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          </Link>
 
-                {/* User Name & Role Pill */}
-                <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--medx-navy)', lineHeight: 1.2 }}>
-                    {user?.name?.split(' ')[0] || 'User'}
-                  </span>
-                  <span style={{ fontSize: '0.6875rem', color: 'var(--medx-text-secondary)', fontWeight: 500 }}>
-                    {roleMeta.roleDisplay}
-                  </span>
-                </div>
+          {/* CENTER: Primary Workspace Navigation in Sticky Navbar (Desktop) */}
+          {isAuthenticated && navItems.length > 0 && (
+            <nav
+              className="medx-desktop-nav"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                overflowX: 'auto',
+                maxWidth: 'calc(100% - 400px)',
+                padding: '0.25rem 0'
+              }}
+              aria-label="Workspace Navigation"
+            >
+              {navItems.map((item) => {
+                const ItemIcon = item.icon;
+                const isActive = currentTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      padding: '0.45rem 0.75rem',
+                      borderRadius: 'var(--medx-radius-sm, 6px)',
+                      border: 'none',
+                      fontSize: '0.8125rem',
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      backgroundColor: isActive
+                        ? (item.isAlert ? '#FEE2E2' : '#F5F3FF')
+                        : 'transparent',
+                      color: isActive
+                        ? (item.isAlert ? '#DC2626' : '#7C3AED')
+                        : '#475569',
+                      borderBottom: isActive
+                        ? `2px solid ${item.isAlert ? '#DC2626' : '#7C3AED'}`
+                        : '2px solid transparent',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <ItemIcon size={16} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
 
-                <ChevronDown
-                  size={15}
-                  color="var(--medx-text-secondary)"
+          {/* RIGHT: Profile & Account Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            {isAuthenticated ? (
+              <>
+                {/* Mobile Workspace Menu Toggle */}
+                <button
+                  type="button"
+                  className="medx-mobile-nav-toggle"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   style={{
-                    transform: profileMenuOpen ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.15s ease'
-                  }}
-                />
-              </button>
-
-              {/* Profile & Account Dropdown Panel */}
-              {profileMenuOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 8px)',
-                  right: 0,
-                  width: '300px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: 'var(--medx-radius-lg)',
-                  boxShadow: '0 20px 35px -10px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(15, 23, 42, 0.08)',
-                  padding: '1rem',
-                  zIndex: 100,
-                  animation: 'fadeIn 0.15s ease'
-                }}>
-                  {/* Account Header */}
-                  <div style={{
-                    display: 'flex',
+                    display: 'none',
                     alignItems: 'center',
-                    gap: '0.75rem',
-                    paddingBottom: '0.875rem',
-                    borderBottom: '1px solid var(--medx-border)'
-                  }}>
+                    justifyContent: 'center',
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--medx-border)',
+                    backgroundColor: mobileMenuOpen ? 'var(--medx-surface-muted)' : 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--medx-navy)'
+                  }}
+                  aria-label="Toggle navigation drawer"
+                >
+                  {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+
+                {/* Profile Dropdown Container */}
+                <div ref={menuRef} style={{ position: 'relative' }}>
+                  {/* Profile Menu Trigger */}
+                  <button
+                    id="profile-menu-toggle"
+                    type="button"
+                    onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.55rem',
+                      padding: '0.35rem 0.65rem 0.35rem 0.45rem',
+                      backgroundColor: profileMenuOpen ? 'var(--medx-surface-muted)' : 'transparent',
+                      border: '1px solid var(--medx-border)',
+                      borderRadius: 'var(--medx-radius-md, 8px)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                    aria-expanded={profileMenuOpen}
+                    aria-label="Account Menu"
+                  >
+                    {/* User Avatar */}
                     <div style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '10px',
-                      backgroundColor: roleMeta.color,
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      backgroundColor: '#7C3AED',
                       color: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
-                      fontSize: '1.125rem',
-                      flexShrink: 0
+                      fontSize: '0.875rem'
                     }}>
                       {user?.name?.charAt(0) || 'U'}
                     </div>
-                    <div style={{ overflow: 'hidden' }}>
-                      <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: 'var(--medx-navy)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {user?.name}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--medx-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {user?.email}
-                      </div>
-                      <span className={`medx-badge ${roleMeta.badgeClass}`} style={{ fontSize: '0.6875rem', padding: '0.1rem 0.45rem', marginTop: '0.25rem', display: 'inline-block' }}>
-                        <ShieldCheck size={12} /> {roleMeta.roleDisplay}
+
+                    {/* User Info Label */}
+                    <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--medx-navy)', lineHeight: 1.2 }}>
+                        {user?.name?.split(' ')[0] || 'User'}
+                      </span>
+                      <span style={{ fontSize: '0.6875rem', color: 'var(--medx-text-secondary)', fontWeight: 500 }}>
+                        {roleMeta.roleDisplay}
                       </span>
                     </div>
-                  </div>
 
-                  {/* Profile Contextual Info */}
-                  <div style={{
-                    backgroundColor: 'var(--medx-surface-muted)',
-                    padding: '0.75rem',
-                    borderRadius: 'var(--medx-radius-sm)',
-                    margin: '0.75rem 0',
-                    fontSize: '0.75rem',
-                    color: 'var(--medx-text-secondary)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.25rem'
-                  }}>
-                    {role === 'doctor' && (
-                      <>
-                        <div><strong>Specialty:</strong> {profile?.specialty || 'General Medicine'}</div>
-                        <div><strong>Affiliation:</strong> {profile?.hospitalName || 'Med-X Network'}</div>
-                      </>
-                    )}
-                    {role === 'hospital_admin' && (
-                      <>
-                        <div><strong>Facility:</strong> {profile?.facilityName || 'Institutional Hospital'}</div>
-                        <div><strong>Capacity:</strong> {profile?.totalBeds || 100} Beds ({profile?.icuBeds || 10} ICU)</div>
-                      </>
-                    )}
-                    {role === 'patient' && (
-                      <>
-                        <div><strong>Health Dossier:</strong> Connected & Synchronized</div>
-                        <div><strong>Emergency SOS:</strong> Real-Time GPS Active</div>
-                      </>
-                    )}
-                    {role === 'lab_admin' && (
-                      <>
-                        <div><strong>Laboratory:</strong> Clinical Diagnostics Center</div>
-                        <div><strong>Sign-off:</strong> Official Medical Technologist</div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Role Specific Workspace Links */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <Link
-                      to={getWorkspacePath()}
+                    <ChevronDown
+                      size={15}
+                      color="var(--medx-text-secondary)"
                       style={{
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: 'var(--medx-radius-sm)',
-                        fontSize: '0.8125rem',
-                        fontWeight: 600,
-                        color: 'var(--medx-navy)',
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
+                        transform: profileMenuOpen ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.15s ease'
                       }}
-                      className="medx-menu-item"
-                    >
-                      <RoleIcon size={16} color={roleMeta.color} />
-                      Open {roleMeta.title}
-                    </Link>
-                  </div>
+                    />
+                  </button>
 
-                  {/* Logout Button */}
-                  <div style={{ paddingTop: '0.75rem', marginTop: '0.75rem', borderTop: '1px solid var(--medx-border)' }}>
-                    <button
-                      type="button"
-                      onClick={handleLogout}
+                  {/* Concise Account Profile Dropdown (Strictly Account Management) */}
+                  {profileMenuOpen && (
+                    <div
                       style={{
-                        width: '100%',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: 'var(--medx-radius-sm)',
-                        fontSize: '0.8125rem',
-                        fontWeight: 600,
-                        color: '#DC2626',
-                        backgroundColor: '#FEF2F2',
-                        border: '1px solid #FEE2E2',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        transition: 'all 0.15s ease'
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        right: 0,
+                        width: '260px',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: 'var(--medx-radius-lg, 12px)',
+                        boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08)',
+                        border: '1px solid var(--medx-border)',
+                        zIndex: 100,
+                        overflow: 'hidden',
+                        animation: 'dropdownFadeIn 0.15s ease-out'
                       }}
+                      role="menu"
                     >
-                      <LogOut size={15} />
-                      Sign Out of Med-X
-                    </button>
-                  </div>
+                      {/* Identity Header */}
+                      <div style={{
+                        padding: '1rem',
+                        backgroundColor: '#F8FAFC',
+                        borderBottom: '1px solid #E2E8F0'
+                      }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--medx-navy)', wordBreak: 'break-word' }}>
+                          {user?.name}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--medx-text-secondary)', marginTop: '0.15rem', wordBreak: 'break-all' }}>
+                          {user?.email}
+                        </div>
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            fontSize: '0.6875rem',
+                            fontWeight: 700,
+                            padding: '0.2rem 0.5rem',
+                            borderRadius: '9999px',
+                            backgroundColor: roleMeta.bg,
+                            color: roleMeta.color,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.03em'
+                          }}>
+                            <ShieldCheck size={12} />
+                            {role?.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Account Management Actions */}
+                      <div style={{ padding: '0.35rem 0' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            setViewProfileOpen(true);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            padding: '0.6rem 1rem',
+                            border: 'none',
+                            background: 'none',
+                            color: '#334155',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                          className="medx-dropdown-item"
+                        >
+                          <UserIcon size={16} color="#64748B" />
+                          <span>View Profile</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            setEditProfileOpen(true);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            padding: '0.6rem 1rem',
+                            border: 'none',
+                            background: 'none',
+                            color: '#334155',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                          className="medx-dropdown-item"
+                        >
+                          <Edit2 size={16} color="#64748B" />
+                          <span>Edit Profile</span>
+                        </button>
+                      </div>
+
+                      <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '0.25rem 0' }} />
+
+                      {/* Sign Out */}
+                      <div style={{ padding: '0.35rem 0' }}>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            padding: '0.6rem 1rem',
+                            border: 'none',
+                            background: 'none',
+                            color: '#334155',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                          className="medx-dropdown-item"
+                        >
+                          <LogOut size={16} color="#64748B" />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+
+                      <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '0.25rem 0' }} />
+
+                      {/* Delete Account Action */}
+                      <div style={{ padding: '0.35rem 0' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            setDeleteAccountOpen(true);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            padding: '0.6rem 1rem',
+                            border: 'none',
+                            background: 'none',
+                            color: '#DC2626',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                          className="medx-dropdown-item"
+                        >
+                          <Trash2 size={16} color="#DC2626" />
+                          <span>Delete Account</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="medx-btn medx-btn-outline"
-                style={{ fontSize: '0.8125rem', padding: '0.45rem 0.75rem', whiteSpace: 'nowrap' }}
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="medx-btn medx-btn-primary"
-                style={{ fontSize: '0.8125rem', padding: '0.45rem 0.75rem', whiteSpace: 'nowrap' }}
-              >
-                Create Account
-              </Link>
-            </>
-          )}
+              </>
+            ) : (
+              /* Public / Unauthenticated Navigation */
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <Link
+                  to="/login"
+                  className="medx-btn medx-btn-outline"
+                  style={{ fontSize: '0.8125rem', padding: '0.45rem 0.75rem', whiteSpace: 'nowrap' }}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="medx-btn medx-btn-primary"
+                  style={{ fontSize: '0.8125rem', padding: '0.45rem 0.75rem', whiteSpace: 'nowrap', backgroundColor: '#7C3AED', borderColor: '#7C3AED' }}
+                >
+                  Create Account
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && isAuthenticated && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              backgroundColor: '#FFFFFF',
+              borderBottom: '1px solid #CBD5E1',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              zIndex: 49
+            }}
+          >
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+              Workspace Navigation
+            </div>
+            {navItems.map((item) => {
+              const ItemIcon = item.icon;
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    navigate(item.path);
+                    setMobileMenuOpen(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    textAlign: 'left',
+                    fontSize: '0.875rem',
+                    fontWeight: isActive ? 700 : 500,
+                    cursor: 'pointer',
+                    backgroundColor: isActive
+                      ? (item.isAlert ? '#FEE2E2' : '#F5F3FF')
+                      : '#F8FAFC',
+                    color: isActive
+                      ? (item.isAlert ? '#DC2626' : '#7C3AED')
+                      : '#334155'
+                  }}
+                >
+                  <ItemIcon size={18} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </header>
+
+      {/* Account Profile Modals */}
+      <ViewProfileModal
+        isOpen={viewProfileOpen}
+        onClose={() => setViewProfileOpen(false)}
+        onEdit={() => setEditProfileOpen(true)}
+      />
+
+      <EditProfileModal
+        isOpen={editProfileOpen}
+        onClose={() => setEditProfileOpen(false)}
+      />
+
+      <DeleteAccountModal
+        isOpen={deleteAccountOpen}
+        onClose={() => setDeleteAccountOpen(false)}
+      />
+    </>
   );
 }
 

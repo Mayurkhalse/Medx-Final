@@ -47,6 +47,14 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       sparse: true
+    },
+    isDeactivated: {
+      type: Boolean,
+      default: false
+    },
+    deactivatedAt: {
+      type: Date,
+      default: null
     }
   },
   {

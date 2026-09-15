@@ -24,6 +24,19 @@ const doctorSchema = new mongoose.Schema(
       trim: true,
       default: 'MBBS'
     },
+    experienceYears: {
+      type: Number,
+      default: 0
+    },
+    consultationFee: {
+      type: Number,
+      default: 0
+    },
+    address: {
+      type: String,
+      trim: true,
+      default: ''
+    },
     department: {
       type: String,
       trim: true,

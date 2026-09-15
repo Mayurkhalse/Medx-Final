@@ -22,6 +22,17 @@ export const authService = {
     return response.data;
   },
 
+  async updateProfile(profileData) {
+    const response = await api.put('/auth/profile', profileData);
+    return response.data;
+  },
+
+  async deleteAccount(confirmation) {
+    const response = await api.post('/auth/delete-account', { confirmation });
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    return response.data;
+  },
+
   async logout() {
     try {
       await api.post('/auth/logout');

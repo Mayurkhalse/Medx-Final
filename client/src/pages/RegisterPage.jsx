@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Activity, AlertCircle, ArrowRight, User, Stethoscope, Building2, FlaskConical } from 'lucide-react';
 import jankotiLogo from '../assets/jankoti-logo.png';
+import MedXLogo from '../components/MedXLogo.jsx';
 
 export function RegisterPage() {
   const [searchParams] = useSearchParams();
@@ -11,11 +12,11 @@ export function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
   const [role, setRole] = useState(initialRole);
-  const [specialty, setSpecialty] = useState('General Physician');
+  const [phone, setPhone] = useState('');
   const [facilityName, setFacilityName] = useState('');
   const [labName, setLabName] = useState('');
+  const [specialty, setSpecialty] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -23,51 +24,32 @@ export function RegisterPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const roleParam = searchParams.get('role');
-    if (roleParam && ['patient', 'doctor', 'hospital_admin', 'lab_admin'].includes(roleParam)) {
-      setRole(roleParam);
+    if (searchParams.get('role')) {
+      setRole(searchParams.get('role'));
     }
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password) {
-      setErrorMsg('Name, email, and password are required.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters long.');
-      return;
-    }
+    setErrorMsg('');
+    setLoading(true);
 
     try {
-      setLoading(true);
-      setErrorMsg('');
-
-      const payload = {
+      const data = await register({
         name,
         email,
         password,
         role,
         phone,
-        specialty: role === 'doctor' ? specialty : undefined,
-        facilityName: role === 'hospital_admin' ? facilityName : undefined,
-        labName: role === 'lab_admin' ? labName : undefined
-      };
-
-      const data = await register(payload);
-
-      // Navigate to authorized workspace
-      switch (data.user.role) {
-        case 'patient': navigate('/patient'); break;
-        case 'doctor': navigate('/doctor'); break;
-        case 'hospital_admin': navigate('/hospital'); break;
-        case 'lab_admin': navigate('/lab'); break;
-        default: navigate('/');
-      }
+        facilityName,
+        labName,
+        specialty
+      });
+      const userRole = data.user.role;
+      const redirectTo = `/${userRole === 'patient' ? 'patient' : userRole === 'doctor' ? 'doctor' : userRole === 'hospital_admin' ? 'hospital' : 'lab'}`;
+      navigate(redirectTo, { replace: true });
     } catch (err) {
-      setErrorMsg(err.response?.data?.error?.message || 'Registration failed. Please verify your inputs.');
+      setErrorMsg(err.response?.data?.error?.message || err.message || 'Registration failed. Please check inputs.');
     } finally {
       setLoading(false);
     }
@@ -93,30 +75,15 @@ export function RegisterPage() {
         {/* Med-X + Jankoti Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
-            <img
-              src="/favicon.svg"
-              alt="Med-X"
-              style={{ height: '32px', width: '32px', borderRadius: '7px' }}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <span style={{
-              fontSize: '1.65rem',
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
-              color: 'var(--medx-navy)',
-              fontFamily: 'var(--medx-font-display)',
-              lineHeight: 1
-            }}>
-              MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
-            </span>
+            <MedXLogo size="lg" />
 
-            <div style={{ width: '1px', height: '22px', backgroundColor: '#CBD5E1', margin: '0 0.15rem' }} />
+            <div style={{ width: '1px', height: '24px', backgroundColor: '#CBD5E1', margin: '0 0.15rem' }} />
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <img
                 src={jankotiLogo}
                 alt="Jankoti"
-                style={{ height: '22px', width: 'auto', objectFit: 'contain' }}
+                style={{ height: '26px', width: 'auto', objectFit: 'contain' }}
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>

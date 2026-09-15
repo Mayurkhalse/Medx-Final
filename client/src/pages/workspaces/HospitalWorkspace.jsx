@@ -12,12 +12,15 @@ import HospitalPatients from '../hospital/HospitalPatients.jsx';
 import HospitalDoctors from '../hospital/HospitalDoctors.jsx';
 import HospitalEmergency from '../hospital/HospitalEmergency.jsx';
 import HospitalDepartments from '../hospital/HospitalDepartments.jsx';
+import { useSearchParams } from 'react-router-dom';
 import HospitalProfile from '../hospital/HospitalProfile.jsx';
 import emergencyService from '../../services/emergencyService.js';
 
 export function HospitalWorkspace() {
   const { user, profile, role } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'care-queue' | 'beds' | 'patients' | 'doctors' | 'emergency'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'dashboard'; // 'dashboard' | 'care-queue' | 'beds' | 'patients' | 'doctors' | 'departments' | 'profile-settings' | 'emergency'
+  const setActiveTab = (tab) => setSearchParams({ tab });
   const [activeSosCount, setActiveSosCount] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 

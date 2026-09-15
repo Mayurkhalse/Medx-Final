@@ -357,3 +357,28 @@ button, input, select, textarea {
 .medx-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* Responsive Sticky Navbar Controls */
+@media (max-width: 900px) {
+  .medx-desktop-nav {
+    display: none !important;
+  }
+  .medx-mobile-nav-toggle {
+    display: flex !important;
+  }
+}
+
+.medx-dropdown-item:hover {
+  background-color: #F1F5F9 !important;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
