@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-do
 import { useAuth } from '../context/AuthContext.jsx';
 import { Activity, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, Stethoscope, Building2, FlaskConical, User } from 'lucide-react';
 import logoImg from '../assets/logo.png';
+import jankotiLogo from '../assets/jankoti-logo.png';
 
 export function LoginPage() {
   const [searchParams] = useSearchParams();
@@ -80,24 +81,39 @@ export function LoginPage() {
           borderRadius: 'var(--medx-radius-xl)'
         }}
       >
-        {/* Med-X Branded Header */}
+        {/* Med-X + Jankoti Branded Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
             <img
               src={logoImg}
               alt="Med-X"
-              style={{ height: '42px', width: 'auto' }}
+              style={{ height: '36px', width: 'auto' }}
               onError={(e) => { e.target.style.display = 'none'; }}
             />
             <span style={{
-              fontSize: '1.75rem',
+              fontSize: '1.65rem',
               fontWeight: 800,
               letterSpacing: '-0.03em',
               color: 'var(--medx-navy)',
-              fontFamily: 'var(--medx-font-display)'
+              fontFamily: 'var(--medx-font-display)',
+              lineHeight: 1
             }}>
               MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
             </span>
+
+            <div style={{ width: '1px', height: '22px', backgroundColor: '#CBD5E1', margin: '0 0.15rem' }} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <img
+                src={jankotiLogo}
+                alt="Jankoti"
+                style={{ height: '22px', width: 'auto', objectFit: 'contain' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <span style={{ fontSize: '0.78125rem', fontWeight: 700, color: '#475569', letterSpacing: '0.02em' }}>
+                Jankoti
+              </span>
+            </div>
           </div>
           <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--medx-navy)', margin: 0 }}>
             Sign In to Your Workspace

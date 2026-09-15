@@ -1,25 +1,31 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar.jsx';
+import Footer from './Footer.jsx';
 
 export function Layout({ children }) {
+  const location = useLocation();
+  const isZeroPadding =
+    location.pathname === '/' ||
+    location.pathname.startsWith('/hospital');
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: 'var(--medx-bg)'
+    }}>
       <Navbar />
-      <main style={{ flex: '1 0 auto', padding: '2rem 0' }}>
+      <main style={{
+        flex: '1 0 auto',
+        padding: isZeroPadding ? '0' : '1.75rem 0',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         {children}
       </main>
-      <footer style={{
-        backgroundColor: 'var(--medx-surface)',
-        borderTop: '1px solid var(--medx-border)',
-        padding: '1.5rem 0',
-        textAlign: 'center',
-        fontSize: '0.8125rem',
-        color: 'var(--medx-text-muted)'
-      }}>
-        <div className="medx-container">
-          <p>© 2026 Med-X Unified Healthcare Platform. All clinical systems protected under unified governance.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -55,6 +55,15 @@ const BIOMARKER_SPECS = {
     refRange: '150k–450k',
     midpoint: 300000,
     color: '#10B981'
+  },
+  riskScore: {
+    key: 'riskScore',
+    label: 'Risk Score',
+    fullName: 'Composite Clinical Risk Score',
+    unit: '/100',
+    refRange: '0–35 (Low)',
+    midpoint: 35,
+    color: '#D97706'
   }
 };
 
@@ -711,6 +720,7 @@ export default function PatientDashboard({ onNavigateToEntry }) {
                   <Line type="monotone" dataKey="wbc_count_norm" name="WBC" stroke={BIOMARKER_SPECS.wbc_count.color} strokeWidth={2} dot={{ r: 4 }} />
                   <Line type="monotone" dataKey="creatinine_norm" name="Creatinine" stroke={BIOMARKER_SPECS.creatinine.color} strokeWidth={2} dot={{ r: 4 }} />
                   <Line type="monotone" dataKey="platelets_norm" name="Platelets" stroke={BIOMARKER_SPECS.platelets.color} strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="riskScore" name="Composite Risk Score (/100)" stroke={BIOMARKER_SPECS.riskScore.color} strokeWidth={3} strokeDasharray="4 4" dot={{ r: 5, fill: BIOMARKER_SPECS.riskScore.color }} />
                 </LineChart>
               ) : (
                 <LineChart data={trends} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -733,6 +743,110 @@ export default function PatientDashboard({ onNavigateToEntry }) {
                 </LineChart>
               )}
             </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* RESTORED RISK-SCORE TRAJECTORY & PROGNOSIS CALLOUT */}
+        {trends.length > 0 && (
+          <div style={{
+            marginTop: '1.25rem',
+            padding: '1.25rem',
+            backgroundColor: '#FFFBEB',
+            border: '1px solid #FDE68A',
+            borderRadius: 'var(--medx-radius-md)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: '#92400E' }}>
+                  Restored Longitudinal Risk Trajectory & Prognosis
+                </span>
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  backgroundColor: '#FEF3C7',
+                  color: '#B45309',
+                  padding: '0.15rem 0.55rem',
+                  borderRadius: '9999px',
+                  border: '1px solid #FCD34D'
+                }}>
+                  {latestReport?.mlResult?.riskTier || (trends[trends.length - 1]?.riskTier) || 'Low'} Risk Tier
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8125rem' }}>
+                <div>
+                  <span style={{ color: '#78350F' }}>Current Score: </span>
+                  <strong style={{ fontSize: '1.125rem', color: '#B45309' }}>
+                    {latestReport?.mlResult?.overallRiskScore ?? trends[trends.length - 1]?.riskScore ?? 0}
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', color: '#92400E' }}>/100</span>
+                </div>
+                {trends.length >= 2 && (
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    backgroundColor:
+                      (trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore) < 0
+                        ? '#DCFCE7'
+                        : (trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore) > 0
+                        ? '#FEE2E2'
+                        : '#EFF6FF',
+                    color:
+                      (trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore) < 0
+                        ? '#166534'
+                        : (trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore) > 0
+                        ? '#991B1B'
+                        : '#1E40AF'
+                  }}>
+                    {(trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore) < 0
+                      ? `Improving (${trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore} pts)`
+                      : (trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore) > 0
+                      ? `Elevated (+${trends[trends.length - 1]?.riskScore - trends[trends.length - 2]?.riskScore} pts)`
+                      : 'Stable (0 pts delta)'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Chronological Risk History Rail */}
+            <div style={{
+              display: 'flex',
+              gap: '0.75rem',
+              overflowX: 'auto',
+              paddingTop: '0.5rem',
+              borderTop: '1px solid #FDE68A'
+            }}>
+              {trends.map((pt, idx) => (
+                <div
+                  key={pt.id || idx}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '6px',
+                    border: '1px solid #FDE68A',
+                    minWidth: '110px',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{ fontSize: '0.7rem', color: '#78350F', fontWeight: 600 }}>{pt.date}</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#B45309', margin: '0.15rem 0' }}>
+                    {pt.riskScore} <span style={{ fontSize: '0.7rem' }}>/100</span>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, color: pt.riskTier === 'Low' ? '#166534' : pt.riskTier === 'Moderate' ? '#B45309' : '#991B1B' }}>
+                    {pt.riskTier || 'Normal'}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontSize: '0.71875rem', color: '#92400E', lineHeight: 1.4 }}>
+              <strong>Clinical Methodology:</strong> Risk trajectory reflects multi-organ clinical evaluation and biomarker flag weighting computed from verified laboratory observations and persisted directly in canonical MedicalReport records.
+            </div>
           </div>
         )}
       </div>
