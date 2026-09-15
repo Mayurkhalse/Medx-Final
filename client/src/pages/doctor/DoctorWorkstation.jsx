@@ -147,7 +147,7 @@ export function DoctorWorkstation({
                 {loading ? '...' : patients.reduce((acc, p) => acc + (p.prescriptionsCount || 0), 0)}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#16A34A', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <CheckCircle2 size={13} /> Synchronized to MongoDB
+                <CheckCircle2 size={13} /> Recorded in Patient Records
               </div>
             </div>
             <div style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.625rem', borderRadius: 'var(--medx-radius-md)' }}>
@@ -445,7 +445,7 @@ export function DoctorWorkstation({
               <strong style={{ fontSize: '0.875rem', color: '#166534' }}>Physician Workstation Online</strong>
             </div>
             <p style={{ fontSize: '0.8125rem', color: '#166534', margin: 0, lineHeight: 1.5 }}>
-              Connected to <strong>medx_unified</strong> MongoDB cluster. All prescription events, review signatures, and dossier updates are authenticated via unified RBAC.
+              Secure clinical network connected. All prescription events, review signatures, and patient records are encrypted and authenticated.
             </p>
           </div>
         </div>

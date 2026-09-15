@@ -144,7 +144,7 @@ export function DoctorReportReviewModal({ report, onClose, onSuccess }) {
                     AI Clinical Diagnostics Risk: {mlResult.riskTier}
                   </div>
                   <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)' }}>
-                    Aggregate Risk Score: {mlResult.overallRiskScore || 85}/100 • Automated biomarker analysis
+                    Aggregate Risk Score: {mlResult.overallRiskScore ?? '—'}/100 • Automated biomarker analysis
                   </div>
                 </div>
               </div>

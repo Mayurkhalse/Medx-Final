@@ -564,7 +564,7 @@ export function DoctorPatients({ onSelectPatient, onOpenCall, onOpenPrescription
                   className="medx-btn medx-btn-primary"
                   disabled={enrollSaving}
                 >
-                  {enrollSaving ? 'Enrolling...' : 'Enroll Patient & Save to MongoDB'}
+                  {enrollSaving ? 'Enrolling...' : 'Enroll Patient'}
                 </button>
               </div>
             </form>

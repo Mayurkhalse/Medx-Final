@@ -49,7 +49,7 @@ export function ContactSection() {
             <div className="conclusion-trust-strip">
               <div className="trust-item">
                 <span className="trust-symbol">🔒</span>
-                <span>Privacy-First RBAC Architecture</span>
+                <span>Privacy-First Role-Based Access Control</span>
               </div>
               <div className="trust-item">
                 <span className="trust-symbol">⚡</span>

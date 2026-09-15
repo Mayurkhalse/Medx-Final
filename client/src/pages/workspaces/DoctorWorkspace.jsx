@@ -15,8 +15,9 @@ import DoctorReportReviewModal from '../doctor/DoctorReportReviewModal.jsx';
 
 export function DoctorWorkspace() {
   const { user, profile, role } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'workstation'; // 'workstation' | 'patients' | 'reports' | 'appointments' | 'availability' | 'emergency'
+  const setActiveTab = (tab) => setSearchParams({ tab });
 
   // Modal states
   const [selectedPatient, setSelectedPatient] = useState(null);

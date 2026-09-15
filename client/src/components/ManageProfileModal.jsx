@@ -597,7 +597,7 @@ export function ManageProfileModal({ isOpen, onClose }) {
                         }}
                       >
                         <Trash2 size={14} />
-                        {deleting ? 'Deactivating...' : 'Confirm Deactivate'}
+                        {deleting ? 'Deactivating...' : 'Confirm Account Deactivation'}
                       </button>
                     </div>
                   </form>

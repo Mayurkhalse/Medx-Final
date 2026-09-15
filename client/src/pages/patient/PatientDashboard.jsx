@@ -463,15 +463,47 @@ export default function PatientDashboard({ onNavigateToEntry }) {
         </div>
       )}
 
-      {/* 5 Core Biomarker Metric Cards */}
+      {/* Core Biomarker & Clinical Risk Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         {Object.entries(BIOMARKER_SPECS).map(([key, spec]) => {
-          const item = latestParams[key];
-          const val = item?.value !== undefined ? item.value : '—';
-          const flag = (latestReport?.mlResult?.flags instanceof Map
-            ? latestReport.mlResult.flags.get(key)
-            : latestReport?.mlResult?.flags?.[key]) || 'normal';
-          const isAbnormal = flag !== 'normal';
+          let val = '—';
+          let badgeText = 'PENDING';
+          let badgeBg = '#F3F4F6';
+          let badgeColor = '#6B7280';
+
+          if (key === 'riskScore') {
+            if (latestReport) {
+              val = latestReport?.mlResult?.overallRiskScore !== undefined
+                ? latestReport.mlResult.overallRiskScore
+                : 25;
+              const currentTier = latestReport?.mlResult?.riskTier || (typeof val === 'number' ? (val > 65 ? 'High' : val > 35 ? 'Moderate' : 'Low') : 'Low');
+              if (currentTier === 'High' || currentTier === 'Critical') {
+                badgeText = `${currentTier.toUpperCase()} RISK`;
+                badgeBg = '#FEE2E2';
+                badgeColor = '#B91C1C';
+              } else if (currentTier === 'Moderate') {
+                badgeText = 'MODERATE RISK';
+                badgeBg = '#FEF3C7';
+                badgeColor = '#B45309';
+              } else {
+                badgeText = 'OPTIMAL';
+                badgeBg = '#ECFDF5';
+                badgeColor = '#047857';
+              }
+            }
+          } else {
+            const item = latestParams[key];
+            if (item?.value !== undefined) {
+              val = item.value;
+              const rawFlag = (latestReport?.mlResult?.flags instanceof Map
+                ? latestReport.mlResult.flags.get(key)
+                : latestReport?.mlResult?.flags?.[key]) || 'normal';
+              const isAbnormal = rawFlag !== 'normal';
+              badgeText = isAbnormal ? rawFlag.replace('_', ' ').toUpperCase() : 'OPTIMAL';
+              badgeBg = isAbnormal ? '#FEE2E2' : '#ECFDF5';
+              badgeColor = isAbnormal ? '#B91C1C' : '#047857';
+            }
+          }
 
           return (
             <div
@@ -495,11 +527,11 @@ export default function PatientDashboard({ onNavigateToEntry }) {
                     fontWeight: 700,
                     padding: '0.15rem 0.45rem',
                     borderRadius: '4px',
-                    backgroundColor: isAbnormal ? '#FEE2E2' : '#ECFDF5',
-                    color: isAbnormal ? '#B91C1C' : '#047857'
+                    backgroundColor: badgeBg,
+                    color: badgeColor
                   }}
                 >
-                  {isAbnormal ? flag.toUpperCase() : 'OPTIMAL'}
+                  {badgeText}
                 </span>
               </div>
 
@@ -1015,7 +1047,7 @@ export default function PatientDashboard({ onNavigateToEntry }) {
                 Overall Risk Score: <strong>{selectedReport.mlResult?.overallRiskScore ?? 'N/A'}/100</strong> ({selectedReport.mlResult?.riskTier || 'Low'})
               </p>
               <p style={{ fontSize: '0.75rem', color: 'var(--medx-text-secondary)', margin: 0 }}>
-                Engine: {selectedReport.mlResult?.modelSignature || 'MedX FastAPI Diagnostic Engine'}
+                Engine: {selectedReport.mlResult?.modelSignature || 'MedX Clinical Diagnostic Engine'}
               </p>
             </div>
 

@@ -177,7 +177,7 @@ export function DoctorReports({ onOpenReview }) {
                         alignItems: 'center',
                         gap: '0.25rem'
                       }}>
-                        <Activity size={12} /> {r.mlResult?.riskTier || 'Normal'} ({r.mlResult?.overallRiskScore || 15}/100)
+                        <Activity size={12} /> {r.mlResult?.riskTier || 'Normal'} ({r.mlResult?.overallRiskScore ?? 0}/100)
                       </span>
                     </td>
 

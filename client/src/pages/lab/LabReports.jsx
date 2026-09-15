@@ -219,7 +219,7 @@ export default function LabReports({ selectedReportFromDash, onClearSelected }) 
                         color: rep.mlResult?.riskTier === 'Critical' ? '#DC2626' :
                                rep.mlResult?.riskTier === 'High' ? '#D97706' : '#16A34A'
                       }}>
-                        {rep.mlResult?.riskTier || 'Low'} ({rep.mlResult?.overallRiskScore || 0})
+                        {rep.mlResult?.riskTier || 'Low'} ({rep.mlResult?.overallRiskScore ?? 0})
                       </span>
                     </td>
                     <td style={{ padding: '0.75rem 0.5rem', color: 'var(--medx-text-secondary)' }}>
