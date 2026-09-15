@@ -445,7 +445,7 @@ export function DoctorWorkstation({
               <strong style={{ fontSize: '0.875rem', color: '#166534' }}>Physician Workstation Online</strong>
             </div>
             <p style={{ fontSize: '0.8125rem', color: '#166534', margin: 0, lineHeight: 1.5 }}>
-              Secure clinical network connected. All prescription events, review signatures, and patient records are encrypted and authenticated.
+              Secure clinical network connected. All prescription events, review signatures, and patient records are verified and authenticated.
             </p>
           </div>
         </div>
