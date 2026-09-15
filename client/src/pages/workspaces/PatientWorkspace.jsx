@@ -67,7 +67,7 @@ export function PatientWorkspace() {
       )}
 
       {(activeTab === 'reports' || activeTab === 'entry') && (
-        <PatientReportEntry onReportCreated={() => setActiveTab('biomarkers')} />
+        <PatientReportEntry onReportCreated={() => setActiveTab('dashboard')} />
       )}
 
       {(activeTab === 'what-if' || activeTab === 'whatif') && (

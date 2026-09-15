@@ -82,21 +82,17 @@ export function Footer() {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: '#111C3D',
-              padding: '0.5rem 0.75rem',
+              backgroundColor: '#FFFFFF',
+              padding: '0.4rem 0.75rem',
               borderRadius: 'var(--medx-radius-sm)',
-              border: '1px solid #1E293B',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               width: 'fit-content'
             }}>
               <img
                 src={jankotiLogo}
-                alt="Jankoti"
-                style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
+                alt="Jankoti - Igniting Future Ideas"
+                style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
               />
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#CBD5E1' }}>
-                Engineered by Jankoti
-              </span>
             </div>
           </div>
 

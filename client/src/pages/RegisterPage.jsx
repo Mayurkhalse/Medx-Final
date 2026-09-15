@@ -83,7 +83,7 @@ export function RegisterPage() {
               <img
                 src={jankotiLogo}
                 alt="Jankoti"
-                style={{ height: '26px', width: 'auto', objectFit: 'contain' }}
+                style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>

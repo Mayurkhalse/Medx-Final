@@ -5,7 +5,6 @@ import {
   Activity,
   LogOut,
   User as UserIcon,
-  ChevronDown,
   ShieldCheck,
   Stethoscope,
   Building2,
@@ -25,15 +24,11 @@ import {
   BedDouble,
   Layers,
   AlertOctagon,
-  PlusCircle,
-  Edit2,
-  Trash2
+  PlusCircle
 } from 'lucide-react';
 import MedXLogo from './MedXLogo.jsx';
 import jankotiLogo from '../assets/jankoti-logo.png';
-import ViewProfileModal from './ViewProfileModal.jsx';
-import EditProfileModal from './EditProfileModal.jsx';
-import DeleteAccountModal from './DeleteAccountModal.jsx';
+import ManageProfileModal from './ManageProfileModal.jsx';
 
 export function Navbar() {
   const { user, profile, role, isAuthenticated, logout } = useAuth();
@@ -42,9 +37,7 @@ export function Navbar() {
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [viewProfileOpen, setViewProfileOpen] = useState(false);
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [manageProfileOpen, setManageProfileOpen] = useState(false);
 
   const menuRef = useRef(null);
 
@@ -126,10 +119,9 @@ export function Navbar() {
     switch (role) {
       case 'patient':
         return [
-          { id: 'dashboard', label: 'Biomarkers', path: '/patient?tab=dashboard', icon: Activity },
-          { id: 'entry', label: 'Reports', path: '/patient?tab=entry', icon: FileText },
-          { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles },
-          { id: 'sos', label: 'Emergency SOS', path: '/patient?tab=sos', icon: AlertTriangle, isAlert: true }
+          { id: 'dashboard', label: 'Dashboard', path: '/patient?tab=dashboard', icon: LayoutDashboard },
+          { id: 'reports', label: 'Reports', path: '/patient?tab=reports', icon: FileText },
+          { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles }
         ];
       case 'doctor':
         return [
@@ -165,7 +157,7 @@ export function Navbar() {
 
   const navItems = getRoleNavItems();
   const searchParams = new URLSearchParams(location.search);
-  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : (role === 'patient' ? 'biomarkers' : 'dashboard'));
+  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : (role === 'patient' ? 'dashboard' : 'dashboard'));
 
   return (
     <>
@@ -216,7 +208,7 @@ export function Navbar() {
               flexShrink: 0
             }} />
 
-            {/* Jankoti Association (28px height, authentic asset, legible text) */}
+            {/* Jankoti Association (34px height, authentic asset, legible text) */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -226,7 +218,7 @@ export function Navbar() {
                 src={jankotiLogo}
                 alt="Jankoti"
                 style={{
-                  height: '28px',
+                  height: '34px',
                   width: 'auto',
                   display: 'block',
                   objectFit: 'contain'
@@ -321,7 +313,7 @@ export function Navbar() {
 
                 {/* Profile Dropdown Container */}
                 <div ref={menuRef} style={{ position: 'relative' }}>
-                  {/* Compact Profile Avatar Trigger [Avatar ▾] */}
+                  {/* Compact Profile Avatar Trigger [PFP Only] */}
                   <button
                     id="profile-menu-toggle"
                     type="button"
@@ -329,41 +321,34 @@ export function Navbar() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
-                      padding: '0.2rem 0.45rem 0.2rem 0.2rem',
-                      backgroundColor: profileMenuOpen ? 'var(--medx-surface-muted)' : 'transparent',
-                      border: '1px solid var(--medx-border)',
-                      borderRadius: '9999px',
+                      justifyContent: 'center',
+                      padding: 0,
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '50%',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease'
+                      transition: 'transform 0.15s ease'
                     }}
                     aria-expanded={profileMenuOpen}
                     aria-label="Account Menu"
                   >
-                    {/* User Avatar */}
+                    {/* User Avatar / PFP */}
                     <div style={{
-                      width: '32px',
-                      height: '32px',
+                      width: '34px',
+                      height: '34px',
                       borderRadius: '50%',
                       backgroundColor: '#7C3AED',
                       color: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.875rem'
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      boxShadow: profileMenuOpen ? '0 0 0 2px #7C3AED' : '0 1px 3px rgba(0,0,0,0.1)',
+                      transition: 'all 0.15s ease'
                     }}>
-                      {user?.name?.charAt(0) || 'U'}
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
-
-                    <ChevronDown
-                      size={14}
-                      color="var(--medx-text-secondary)"
-                      style={{
-                        transform: profileMenuOpen ? 'rotate(180deg)' : 'none',
-                        transition: 'transform 0.15s ease'
-                      }}
-                    />
                   </button>
 
                   {/* Concise Account Profile Dropdown (Strictly Account Management) */}
@@ -373,7 +358,7 @@ export function Navbar() {
                         position: 'absolute',
                         top: 'calc(100% + 8px)',
                         right: 0,
-                        width: '260px',
+                        width: '240px',
                         backgroundColor: '#FFFFFF',
                         borderRadius: 'var(--medx-radius-lg, 12px)',
                         boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08)',
@@ -384,9 +369,9 @@ export function Navbar() {
                       }}
                       role="menu"
                     >
-                      {/* Identity Header */}
+                      {/* Identity Header: Name, Email, Role */}
                       <div style={{
-                        padding: '1rem',
+                        padding: '0.875rem 1rem',
                         backgroundColor: '#F8FAFC',
                         borderBottom: '1px solid #E2E8F0'
                       }}>
@@ -416,13 +401,14 @@ export function Navbar() {
                         </div>
                       </div>
 
-                      {/* Account Management Actions */}
+                      {/* Manage Profile */}
                       <div style={{ padding: '0.35rem 0' }}>
                         <button
                           type="button"
+                          id="nav-manage-profile-btn"
                           onClick={() => {
                             setProfileMenuOpen(false);
-                            setViewProfileOpen(true);
+                            setManageProfileOpen(true);
                           }}
                           style={{
                             width: '100%',
@@ -436,47 +422,23 @@ export function Navbar() {
                             fontSize: '0.8125rem',
                             fontWeight: 500,
                             cursor: 'pointer',
-                            textAlign: 'left'
+                            textAlign: 'left',
+                            transition: 'background-color 0.15s ease'
                           }}
                           className="medx-dropdown-item"
                         >
-                          <UserIcon size={16} color="#64748B" />
-                          <span>View Profile</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProfileMenuOpen(false);
-                            setEditProfileOpen(true);
-                          }}
-                          style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.65rem',
-                            padding: '0.6rem 1rem',
-                            border: 'none',
-                            background: 'none',
-                            color: '#334155',
-                            fontSize: '0.8125rem',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            textAlign: 'left'
-                          }}
-                          className="medx-dropdown-item"
-                        >
-                          <Edit2 size={16} color="#64748B" />
-                          <span>Edit Profile</span>
+                          <Settings size={16} color="#64748B" />
+                          <span>Manage Profile</span>
                         </button>
                       </div>
 
-                      <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '0.25rem 0' }} />
+                      <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: 0 }} />
 
                       {/* Sign Out */}
                       <div style={{ padding: '0.35rem 0' }}>
                         <button
                           type="button"
+                          id="nav-sign-out-btn"
                           onClick={handleLogout}
                           style={{
                             width: '100%',
@@ -490,43 +452,13 @@ export function Navbar() {
                             fontSize: '0.8125rem',
                             fontWeight: 500,
                             cursor: 'pointer',
-                            textAlign: 'left'
+                            textAlign: 'left',
+                            transition: 'background-color 0.15s ease'
                           }}
                           className="medx-dropdown-item"
                         >
                           <LogOut size={16} color="#64748B" />
                           <span>Sign Out</span>
-                        </button>
-                      </div>
-
-                      <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '0.25rem 0' }} />
-
-                      {/* Delete Account Action */}
-                      <div style={{ padding: '0.35rem 0' }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProfileMenuOpen(false);
-                            setDeleteAccountOpen(true);
-                          }}
-                          style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.65rem',
-                            padding: '0.6rem 1rem',
-                            border: 'none',
-                            background: 'none',
-                            color: '#DC2626',
-                            fontSize: '0.8125rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            textAlign: 'left'
-                          }}
-                          className="medx-dropdown-item"
-                        >
-                          <Trash2 size={16} color="#DC2626" />
-                          <span>Delete Account</span>
                         </button>
                       </div>
                     </div>
@@ -615,21 +547,10 @@ export function Navbar() {
         )}
       </header>
 
-      {/* Account Profile Modals */}
-      <ViewProfileModal
-        isOpen={viewProfileOpen}
-        onClose={() => setViewProfileOpen(false)}
-        onEdit={() => setEditProfileOpen(true)}
-      />
-
-      <EditProfileModal
-        isOpen={editProfileOpen}
-        onClose={() => setEditProfileOpen(false)}
-      />
-
-      <DeleteAccountModal
-        isOpen={deleteAccountOpen}
-        onClose={() => setDeleteAccountOpen(false)}
+      {/* Account Profile Management Modal */}
+      <ManageProfileModal
+        isOpen={manageProfileOpen}
+        onClose={() => setManageProfileOpen(false)}
       />
     </>
   );
