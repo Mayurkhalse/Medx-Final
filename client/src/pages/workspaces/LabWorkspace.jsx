@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import {
-  ShieldCheck, FlaskConical, LayoutDashboard,
-  FileText, PlusCircle, Building2
-} from 'lucide-react';
+import { ShieldCheck, FlaskConical } from 'lucide-react';
 import LabDashboard from '../lab/LabDashboard.jsx';
 import LabReports from '../lab/LabReports.jsx';
 import LabNewReport from '../lab/LabNewReport.jsx';
@@ -40,7 +37,7 @@ export function LabWorkspace() {
                 {profile?.labName || 'Diagnostic Laboratory Hub'}
               </h1>
               <p style={{ color: 'var(--medx-text-secondary)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>
-                Diagnostic Testing • Canonical MedicalReport Issuance • Quality Sign-Off • Laboratory Management
+                Diagnostic Testing • Diagnostic Report Issuance & Validation • Quality Sign-Off • Laboratory Management
               </p>
             </div>
           </div>
@@ -64,76 +61,6 @@ export function LabWorkspace() {
           <div><strong>Facility Code:</strong> {profile?.code || profile?.legacyId || 'LAB-01'}</div>
           <div><strong>Accreditation:</strong> {profile?.accreditation || 'NABL & CAP Certified'}</div>
           <div><strong>Quality Standard:</strong> <span style={{ color: '#16A34A', fontWeight: 600 }}>ISO 15189 Quality Compliant</span></div>
-        </div>
-
-        {/* Workspace Navigation Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          marginTop: '1.25rem',
-          borderTop: '1px solid var(--medx-border)',
-          paddingTop: '1rem',
-          overflowX: 'auto'
-        }}>
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`medx-btn ${activeTab === 'dashboard' ? 'medx-btn-primary' : 'medx-btn-secondary'}`}
-            style={{
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: activeTab === 'dashboard' ? '#EA580C' : undefined,
-              borderColor: activeTab === 'dashboard' ? '#EA580C' : undefined
-            }}
-          >
-            <LayoutDashboard size={16} /> Dashboard
-          </button>
-
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`medx-btn ${activeTab === 'reports' ? 'medx-btn-primary' : 'medx-btn-secondary'}`}
-            style={{
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: activeTab === 'reports' ? '#EA580C' : undefined,
-              borderColor: activeTab === 'reports' ? '#EA580C' : undefined
-            }}
-          >
-            <FileText size={16} /> Diagnostic Reports
-          </button>
-
-          <button
-            onClick={() => setActiveTab('new_report')}
-            className={`medx-btn ${activeTab === 'new_report' ? 'medx-btn-primary' : 'medx-btn-secondary'}`}
-            style={{
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: activeTab === 'new_report' ? '#EA580C' : undefined,
-              borderColor: activeTab === 'new_report' ? '#EA580C' : undefined
-            }}
-          >
-            <PlusCircle size={16} /> New Diagnostic Report
-          </button>
-
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`medx-btn ${activeTab === 'profile' ? 'medx-btn-primary' : 'medx-btn-secondary'}`}
-            style={{
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: activeTab === 'profile' ? '#EA580C' : undefined,
-              borderColor: activeTab === 'profile' ? '#EA580C' : undefined
-            }}
-          >
-            <Building2 size={16} /> Lab Facility Profile
-          </button>
         </div>
       </div>
 

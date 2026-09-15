@@ -358,7 +358,7 @@ export default function HospitalDashboard({ onNavigateTab }) {
               Recent Inpatient Laboratory Diagnostics
             </h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--medx-text-secondary)', margin: '0.25rem 0 0 0' }}>
-              Canonical MedicalReports associated with institutional care
+              Verified diagnostic reports associated with institutional care
             </p>
           </div>
         </div>

@@ -104,7 +104,7 @@ export default function LabDashboard({ onNavigateTab, onSelectReport }) {
             {stats?.totalReports || 0}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--medx-text-secondary)', marginTop: '0.25rem' }}>
-            Canonical MedicalReport records
+            Verified Diagnostic Report Records
           </div>
         </div>
 

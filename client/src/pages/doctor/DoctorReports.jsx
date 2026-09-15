@@ -47,7 +47,7 @@ export function DoctorReports({ onOpenReview }) {
               Diagnostic Report Review Center
             </h2>
             <p style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', margin: '0.25rem 0 0 0' }}>
-              Canonical MedicalReports submitted by patients, clinical entry, and laboratory tests
+              Comprehensive medical reports submitted by patients, clinicians, and laboratories
             </p>
           </div>
 
@@ -124,7 +124,7 @@ export function DoctorReports({ onOpenReview }) {
             {loading ? (
               <tr>
                 <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--medx-text-secondary)' }}>
-                  Loading canonical medical reports...
+                  Loading medical reports...
                 </td>
               </tr>
             ) : filteredReports.length === 0 ? (

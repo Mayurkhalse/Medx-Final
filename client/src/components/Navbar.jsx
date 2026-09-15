@@ -165,7 +165,7 @@ export function Navbar() {
 
   const navItems = getRoleNavItems();
   const searchParams = new URLSearchParams(location.search);
-  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : 'dashboard');
+  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : (role === 'patient' ? 'biomarkers' : 'dashboard'));
 
   return (
     <>
@@ -177,20 +177,23 @@ export function Navbar() {
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        height: '68px',
+        height: '64px',
         boxShadow: '0 2px 12px rgba(15, 23, 42, 0.04)',
         transition: 'all 0.2s ease'
       }}>
-        <div className="medx-container" style={{
+        <div style={{
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: '0 1rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           height: '100%',
-          gap: '1rem'
+          gap: '0.75rem'
         }}>
           {/* LEFT: Authoritative Brand Lockup ([MedX] | [Jankoti]) */}
           <Link
-            to="/"
+            to={isAuthenticated ? (roleMeta.defaultPath || '/') : '/'}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -207,13 +210,13 @@ export function Navbar() {
             {/* Subtle Vertical Divider */}
             <div style={{
               width: '1px',
-              height: '20px',
+              height: '22px',
               backgroundColor: '#CBD5E1',
-              margin: '0 0.15rem',
+              margin: '0 0.1rem',
               flexShrink: 0
             }} />
 
-            {/* Jankoti Association (Exactly Once, 24px visual height, authentic asset) */}
+            {/* Jankoti Association (28px height, authentic asset, legible text) */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -223,7 +226,7 @@ export function Navbar() {
                 src={jankotiLogo}
                 alt="Jankoti"
                 style={{
-                  height: '24px',
+                  height: '28px',
                   width: 'auto',
                   display: 'block',
                   objectFit: 'contain'
@@ -242,16 +245,17 @@ export function Navbar() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
-                overflowX: 'auto',
-                maxWidth: 'calc(100% - 400px)',
+                gap: '0.35rem',
+                flexWrap: 'nowrap',
+                flex: 1,
+                justifyContent: 'center',
                 padding: '0.25rem 0'
               }}
               aria-label="Workspace Navigation"
             >
               {navItems.map((item) => {
                 const ItemIcon = item.icon;
-                const isActive = currentTab === item.id;
+                const isActive = currentTab === item.id || (item.id === 'biomarkers' && currentTab === 'dashboard');
                 return (
                   <button
                     key={item.id}
@@ -260,8 +264,8 @@ export function Navbar() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
-                      padding: '0.45rem 0.75rem',
+                      gap: '0.35rem',
+                      padding: '0.4rem 0.65rem',
                       borderRadius: 'var(--medx-radius-sm, 6px)',
                       border: 'none',
                       fontSize: '0.8125rem',
@@ -280,7 +284,7 @@ export function Navbar() {
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <ItemIcon size={16} />
+                    <ItemIcon size={15} />
                     <span>{item.label}</span>
                   </button>
                 );
@@ -295,6 +299,7 @@ export function Navbar() {
                 {/* Mobile Workspace Menu Toggle */}
                 <button
                   type="button"
+                  id="medx-mobile-nav-toggle"
                   className="medx-mobile-nav-toggle"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   style={{
@@ -316,7 +321,7 @@ export function Navbar() {
 
                 {/* Profile Dropdown Container */}
                 <div ref={menuRef} style={{ position: 'relative' }}>
-                  {/* Profile Menu Trigger */}
+                  {/* Compact Profile Avatar Trigger [Avatar ▾] */}
                   <button
                     id="profile-menu-toggle"
                     type="button"
@@ -324,11 +329,11 @@ export function Navbar() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.55rem',
-                      padding: '0.35rem 0.65rem 0.35rem 0.45rem',
+                      gap: '0.35rem',
+                      padding: '0.2rem 0.45rem 0.2rem 0.2rem',
                       backgroundColor: profileMenuOpen ? 'var(--medx-surface-muted)' : 'transparent',
                       border: '1px solid var(--medx-border)',
-                      borderRadius: 'var(--medx-radius-md, 8px)',
+                      borderRadius: '9999px',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
                     }}
@@ -339,7 +344,7 @@ export function Navbar() {
                     <div style={{
                       width: '32px',
                       height: '32px',
-                      borderRadius: '8px',
+                      borderRadius: '50%',
                       backgroundColor: '#7C3AED',
                       color: '#FFFFFF',
                       display: 'flex',
@@ -351,18 +356,8 @@ export function Navbar() {
                       {user?.name?.charAt(0) || 'U'}
                     </div>
 
-                    {/* User Info Label */}
-                    <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--medx-navy)', lineHeight: 1.2 }}>
-                        {user?.name?.split(' ')[0] || 'User'}
-                      </span>
-                      <span style={{ fontSize: '0.6875rem', color: 'var(--medx-text-secondary)', fontWeight: 500 }}>
-                        {roleMeta.roleDisplay}
-                      </span>
-                    </div>
-
                     <ChevronDown
-                      size={15}
+                      size={14}
                       color="var(--medx-text-secondary)"
                       style={{
                         transform: profileMenuOpen ? 'rotate(180deg)' : 'none',

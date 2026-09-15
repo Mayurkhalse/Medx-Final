@@ -92,7 +92,7 @@ export function Footer() {
               <img
                 src={jankotiLogo}
                 alt="Jankoti"
-                style={{ height: '20px', width: 'auto' }}
+                style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
               />
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#CBD5E1' }}>
                 Engineered by Jankoti

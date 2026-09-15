@@ -746,7 +746,7 @@ export default function PatientDashboard({ onNavigateToEntry }) {
           </div>
         )}
 
-        {/* RESTORED RISK-SCORE TRAJECTORY & PROGNOSIS CALLOUT */}
+        {/* RISK-SCORE TRAJECTORY & PROGNOSIS CALLOUT */}
         {trends.length > 0 && (
           <div style={{
             marginTop: '1.25rem',
@@ -761,7 +761,7 @@ export default function PatientDashboard({ onNavigateToEntry }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: '#92400E' }}>
-                  Restored Longitudinal Risk Trajectory & Prognosis
+                  Risk Score Trajectory
                 </span>
                 <span style={{
                   fontSize: '0.75rem',
@@ -845,7 +845,7 @@ export default function PatientDashboard({ onNavigateToEntry }) {
             </div>
 
             <div style={{ fontSize: '0.71875rem', color: '#92400E', lineHeight: 1.4 }}>
-              <strong>Clinical Methodology:</strong> Risk trajectory reflects multi-organ clinical evaluation and biomarker flag weighting computed from verified laboratory observations and persisted directly in canonical MedicalReport records.
+              <strong>Clinical Methodology:</strong> Risk trajectory reflects multi-organ clinical evaluation and biomarker flag weighting computed from verified laboratory observations and persisted directly in official medical report records.
             </div>
           </div>
         )}

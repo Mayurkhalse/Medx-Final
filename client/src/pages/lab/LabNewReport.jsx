@@ -148,7 +148,7 @@ export default function LabNewReport({ onReportCreated }) {
           Diagnostic Report Created!
         </h3>
         <p style={{ color: 'var(--medx-text-secondary)', marginBottom: '1.5rem' }}>
-          Canonical MedicalReport <strong>{successResult.reportId}</strong> has been persisted to the unified MongoDB database with status <strong>{successResult.status}</strong>.
+          Diagnostic Report <strong>{successResult.reportId}</strong> has been recorded successfully with status <strong>{successResult.status}</strong>.
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <button
@@ -184,7 +184,7 @@ export default function LabNewReport({ onReportCreated }) {
           Create Diagnostic Medical Report
         </h2>
         <p style={{ fontSize: '0.875rem', color: 'var(--medx-text-secondary)' }}>
-          Direct diagnostic entry into the canonical Med-X MedicalReport collection
+          Direct diagnostic test entry into verified Med-X clinical records
         </p>
       </div>
 
@@ -374,7 +374,7 @@ export default function LabNewReport({ onReportCreated }) {
                 3. Biomarker Results & Reference Context
               </h3>
               <p style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)' }}>
-                Canonical extensible parameter representation
+                Standardized biomarker and parameter documentation
               </p>
             </div>
             <button

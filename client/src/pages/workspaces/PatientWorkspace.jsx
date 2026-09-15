@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { ShieldCheck, User, Activity, FileText, Sparkles } from 'lucide-react';
+import { ShieldCheck, User } from 'lucide-react';
 import PatientDashboard from '../patient/PatientDashboard.jsx';
 import PatientReportEntry from '../patient/PatientReportEntry.jsx';
 import PatientWhatIf from '../patient/PatientWhatIf.jsx';
@@ -61,99 +61,16 @@ export function PatientWorkspace() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: '0.5rem',
-        marginBottom: '1.5rem',
-        backgroundColor: '#FFFFFF',
-        padding: '0.375rem',
-        borderRadius: 'var(--medx-radius-md)',
-        border: '1px solid var(--medx-border)'
-      }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab('dashboard')}
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--medx-radius-sm)',
-            border: 'none',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            cursor: 'pointer',
-            backgroundColor: activeTab === 'dashboard' ? 'var(--medx-primary-light)' : 'transparent',
-            color: activeTab === 'dashboard' ? 'var(--medx-primary)' : 'var(--medx-text-secondary)',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <Activity size={18} />
-          Biomarker Dashboard & Trends
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('entry')}
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--medx-radius-sm)',
-            border: 'none',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            cursor: 'pointer',
-            backgroundColor: activeTab === 'entry' ? 'var(--medx-primary-light)' : 'transparent',
-            color: activeTab === 'entry' ? 'var(--medx-primary)' : 'var(--medx-text-secondary)',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <FileText size={18} />
-          Log Report (Manual / PDF)
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('whatif')}
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--medx-radius-sm)',
-            border: 'none',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            cursor: 'pointer',
-            backgroundColor: activeTab === 'whatif' ? '#F3E8FF' : 'transparent',
-            color: activeTab === 'whatif' ? '#9333EA' : 'var(--medx-text-secondary)',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <Sparkles size={18} />
-          What-If Health Simulator
-        </button>
-      </div>
-
-      {/* Tab Panels */}
-      {(activeTab === 'dashboard' || activeTab === 'sos') && (
-        <PatientDashboard onNavigateToEntry={() => setActiveTab('entry')} scrollToSos={activeTab === 'sos'} />
+      {/* Primary Tab Panels (Driven exclusively by sticky top navbar) */}
+      {(activeTab === 'biomarkers' || activeTab === 'dashboard' || activeTab === 'sos') && (
+        <PatientDashboard onNavigateToEntry={() => setActiveTab('reports')} scrollToSos={activeTab === 'sos'} />
       )}
 
-      {activeTab === 'entry' && (
-        <PatientReportEntry onReportCreated={() => setActiveTab('dashboard')} />
+      {(activeTab === 'reports' || activeTab === 'entry') && (
+        <PatientReportEntry onReportCreated={() => setActiveTab('biomarkers')} />
       )}
 
-      {activeTab === 'whatif' && (
+      {(activeTab === 'what-if' || activeTab === 'whatif') && (
         <PatientWhatIf />
       )}
     </div>
