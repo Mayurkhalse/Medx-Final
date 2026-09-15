@@ -10,7 +10,7 @@ In traditional healthcare infrastructure, clinical records, patient-facing porta
 
 - **Patients** access their longitudinal diagnostic history, track physiological biomarkers, run AI What-If simulations, and trigger emergency SOS assistance.
 - **Doctors** evaluate consultation triage queues, review diagnostic laboratory reports, issue prescriptions, record clinical notes, and dispatch emergency responses.
-- **Hospital Administrators** oversee hospital operations, monitor bed and ICU occupancy in real time, manage a 6-stage patient care queue, and manage physician departments.
+- **Hospital Administrators** oversee hospital operations, monitor current bed and ICU occupancy, manage a 6-stage patient care queue, and manage physician departments.
 - **Laboratory Administrators** ingest and parse laboratory test results, compare values against established reference ranges, and digitally finalize reports for physician review.
 
 ---
@@ -83,7 +83,7 @@ graph TD
 ### Architectural Highlights
 - **Resilient ML Service Boundary**: The Node.js backend communicates with the FastAPI microservice via HTTP (`POST /analyze`) for machine learning risk inference. If the ML microservice is unreachable or times out, the backend executes a rule-based clinical reference-range evaluation fallback, calculating standard physiological bounds and ensuring uninterrupted report processing without fabricating ML predictions.
 - **Strict Database Persistence**: The backend mandates a persistent MongoDB database at runtime. Mock and in-memory databases are strictly restricted to isolated automated testing.
-- **Unified Identity Model**: A single canonical `User` identity maps 1-to-1 with role-specific profiles (`Patient`, `Doctor`, `Hospital`, `Lab`), enforcing secure foreign key relationships across medical reports, prescriptions, and alerts.
+- **Unified Identity Model**: A single canonical `User` identity maps 1-to-1 with role-specific profiles (`Patient`, `Doctor`, `Hospital`, `Lab`), enforcing secure document references and authorization relationships across medical reports, prescriptions, and alerts.
 
 ---
 
@@ -351,7 +351,7 @@ Med-X implements a stateless JSON Web Token (JWT) architecture:
 
 ### Patient Workflow (`/patient`)
 - **Biomarker Dashboard**: Overview of 5 core metrics with individual observation status badges (`OPTIMAL`, `HIGH`, `CRITICAL HIGH`, `PENDING`) based on verified clinical reference ranges.
-- **Composite Risk Score**: Authoritative aggregate risk score (/100) and multi-factorial risk tier (`Low`, `Moderate`, `High`, `Critical`) synchronized with the ML assessment banner, distinct from individual biomarker statuses.
+- **Composite Risk Score**: Authoritative aggregate risk score (/100) and multifactorial risk tier (`Low`, `Moderate`, `High`, `Critical`) using the same authoritative composite risk score displayed in the ML assessment, distinct from individual biomarker statuses.
 - **Report Ingestion**:
   - Manual Entry: Direct parameter entry with immediate risk computation.
   - PDF Upload: Document upload with automated biomarker extraction.
@@ -360,7 +360,7 @@ Med-X implements a stateless JSON Web Token (JWT) architecture:
 
 ### Doctor Workflow (`/doctor`)
 - **Clinical Workstation**: Unified dashboard displaying active clinical queue, pending diagnostic reviews, and active emergency alerts.
-- **Outpatient Triage Queue**: Real-time patient intake queue with immediate status updates.
+- **Outpatient Triage Queue**: Patient intake queue with immediate status updates.
 - **Patient Management**: Clinical roster viewing, vital statistics examination, prescription drafting, and physician notes.
 - **Diagnostic Report Review**: Formal review of patient reports with digital sign-off.
 - **Emergency SOS Desk**: Triage desk to acknowledge emergency alerts and dispatch ambulance teams.
@@ -374,7 +374,7 @@ Med-X implements a stateless JSON Web Token (JWT) architecture:
 ### Laboratory Workflow (`/lab`)
 - **Diagnostic Pathology Dashboard**: Test intake tracking and diagnostic processing status.
 - **Report Drafting & Parameterization**: Input of numerical biomarker observations with instant range verification.
-- **Clinical Finalization**: Digital sign-off locking reports against subsequent mutation and dispatching them to patients and physicians.
+- **Clinical Finalization**: Digital sign-off locking reports against subsequent modification and dispatching them to patients and physicians.
 
 ---
 
@@ -441,7 +441,7 @@ To maintain clinical reliability and architectural clarity, the following bounda
 - **Authentication & RBAC**: Every private route is protected by JWT verification and role-specific guards (`patient`, `doctor`, `hospital_admin`, `lab_admin`).
 - **IDOR & Resource Authorization**: Patients cannot access foreign medical records; doctors and hospitals can only access records within authorized clinical assignments and facility affiliations.
 - **Credential Protection**: Passwords are never stored in plaintext; hashing uses `bcryptjs`. Sensitive configurations are managed strictly via environment variables (`.env`).
-- **Data Encryption**: Data in transit should be secured via HTTPS/TLS in production deployments. Database encryption at rest should be configured via MongoDB WiredTiger storage engine encryption.
+- **Data Encryption**: Data in transit should be secured via HTTPS/TLS in production deployments. Database encryption at rest should be enabled according to the MongoDB deployment's supported security configuration.
 
 ---
 
