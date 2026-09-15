@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Activity, AlertCircle, ArrowRight, User, Stethoscope, Building2, FlaskConical } from 'lucide-react';
-import logoImg from '../assets/logo.png';
 import jankotiLogo from '../assets/jankoti-logo.png';
 
 export function RegisterPage() {
@@ -95,9 +94,9 @@ export function RegisterPage() {
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
             <img
-              src={logoImg}
+              src="/favicon.svg"
               alt="Med-X"
-              style={{ height: '36px', width: 'auto' }}
+              style={{ height: '32px', width: '32px', borderRadius: '7px' }}
               onError={(e) => { e.target.style.display = 'none'; }}
             />
             <span style={{
@@ -113,16 +112,13 @@ export function RegisterPage() {
 
             <div style={{ width: '1px', height: '22px', backgroundColor: '#CBD5E1', margin: '0 0.15rem' }} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <img
                 src={jankotiLogo}
                 alt="Jankoti"
                 style={{ height: '22px', width: 'auto', objectFit: 'contain' }}
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
-              <span style={{ fontSize: '0.78125rem', fontWeight: 700, color: '#475569', letterSpacing: '0.02em' }}>
-                Jankoti
-              </span>
             </div>
           </div>
           <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--medx-navy)', margin: 0 }}>

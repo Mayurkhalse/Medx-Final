@@ -15,7 +15,6 @@ import {
   Settings,
   Clock
 } from 'lucide-react';
-import logoImg from '../assets/logo.png';
 import jankotiLogo from '../assets/jankoti-logo.png';
 
 export function Navbar() {
@@ -129,41 +128,43 @@ export function Navbar() {
         justifyContent: 'space-between',
         height: '100%'
       }}>
-        {/* LEFT: Authoritative Brand Lockup (Med-X + Jankoti) */}
+        {/* LEFT: Authoritative Brand Lockup (MED-X | Jankoti) */}
         <Link
           to="/"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.875rem',
-            textDecoration: 'none'
+            gap: '0.65rem',
+            textDecoration: 'none',
+            flexShrink: 0,
+            whiteSpace: 'nowrap'
           }}
           aria-label="Med-X Home"
         >
-          {/* Med-X Emblem */}
-          <img
-            src={logoImg}
-            alt="Med-X Logo"
-            style={{
-              height: '34px',
-              width: 'auto',
-              display: 'block',
-              borderRadius: '6px'
-            }}
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
-          />
-
-          {/* Med-X Wordmark */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Med-X Identity (Primary Product Brand) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+            <img
+              src="/favicon.svg"
+              alt="Med-X"
+              style={{
+                height: '28px',
+                width: '28px',
+                display: 'block',
+                borderRadius: '6px',
+                flexShrink: 0
+              }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
             <span style={{
-              fontSize: '1.4rem',
+              fontSize: '1.35rem',
               fontWeight: 800,
               letterSpacing: '-0.035em',
               color: 'var(--medx-navy)',
               fontFamily: 'var(--medx-font-display)',
-              lineHeight: 1
+              lineHeight: 1,
+              whiteSpace: 'nowrap'
             }}>
               MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
             </span>
@@ -172,22 +173,23 @@ export function Navbar() {
           {/* Subtle Vertical Divider */}
           <div style={{
             width: '1px',
-            height: '22px',
+            height: '20px',
             backgroundColor: '#CBD5E1',
-            margin: '0 0.15rem'
+            margin: '0 0.1rem',
+            flexShrink: 0
           }} />
 
-          {/* Jankoti Association Lockup */}
+          {/* Jankoti Association (Appears Exactly Once, No duplicate text) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.45rem'
+            flexShrink: 0
           }}>
             <img
               src={jankotiLogo}
               alt="Jankoti"
               style={{
-                height: '24px',
+                height: '22px',
                 width: 'auto',
                 display: 'block',
                 objectFit: 'contain'
@@ -196,15 +198,6 @@ export function Navbar() {
                 e.target.style.display = 'none';
               }}
             />
-            <span style={{
-              fontSize: '0.78125rem',
-              fontWeight: 700,
-              color: '#475569',
-              letterSpacing: '0.02em',
-              display: 'inline-block'
-            }}>
-              Jankoti
-            </span>
           </div>
         </Link>
 
@@ -433,14 +426,14 @@ export function Navbar() {
               <Link
                 to="/login"
                 className="medx-btn medx-btn-outline"
-                style={{ fontSize: '0.8125rem', padding: '0.45rem 1rem' }}
+                style={{ fontSize: '0.8125rem', padding: '0.45rem 0.75rem', whiteSpace: 'nowrap' }}
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
                 className="medx-btn medx-btn-primary"
-                style={{ fontSize: '0.8125rem', padding: '0.45rem 1rem' }}
+                style={{ fontSize: '0.8125rem', padding: '0.45rem 0.75rem', whiteSpace: 'nowrap' }}
               >
                 Create Account
               </Link>

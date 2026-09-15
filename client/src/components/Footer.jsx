@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logoImg from '../assets/logo.png';
 import jankotiLogo from '../assets/jankoti-logo.png';
 import { Activity, ShieldCheck, Heart, Stethoscope, Building2, FlaskConical } from 'lucide-react';
 
@@ -32,7 +31,9 @@ export function Footer() {
           gap: '0.5rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontWeight: 800, color: 'var(--medx-navy)' }}>MED-X</span>
+            <span style={{ fontWeight: 800, color: 'var(--medx-navy)' }}>
+              MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
+            </span>
             <span>•</span>
             <span style={{ color: '#64748B' }}>Powered by Jankoti</span>
             <span>•</span>
@@ -65,11 +66,12 @@ export function Footer() {
         }}>
           {/* Brand & Mission Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
               <img
-                src={logoImg}
+                src="/favicon.svg"
                 alt="Med-X"
-                style={{ height: '32px', width: 'auto', borderRadius: '4px' }}
+                style={{ height: '28px', width: '28px', borderRadius: '6px' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
               <span style={{
                 fontSize: '1.35rem',
@@ -78,7 +80,7 @@ export function Footer() {
                 color: '#FFFFFF',
                 fontFamily: 'var(--medx-font-display)'
               }}>
-                MED<span style={{ color: '#38BDF8' }}>-X</span>
+                MED<span style={{ color: 'var(--medx-primary)' }}>-X</span>
               </span>
             </div>
 
