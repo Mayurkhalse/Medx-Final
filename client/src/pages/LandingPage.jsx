@@ -15,6 +15,9 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { HeroCarousel } from './landing/HeroCarousel.jsx';
+import { CoverageSection } from './landing/CoverageSection.jsx';
+import { HowItWorksSection } from './landing/HowItWorksSection.jsx';
+import { ContactSection } from './landing/ContactSection.jsx';
 import '../styles/landing.css';
 
 export function LandingPage() {
@@ -266,6 +269,15 @@ export function LandingPage() {
             })}
           </div>
         </section>
+
+        {/* Restored Editorial Coverage Ecosystem Canvas */}
+        <CoverageSection />
+
+        {/* Restored Progressive How-It-Works Journey Rail */}
+        <HowItWorksSection />
+
+        {/* Restored Institutional Inquiry & Brand Climax Channel */}
+        <ContactSection />
       </div>
     </div>
   );

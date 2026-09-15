@@ -262,66 +262,77 @@ export function DoctorWorkstation({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {queue.map((item, idx) => {
-                const isUrgent = item.priority === 'Urgent' || item.status === 'Critical';
+                const isCritical = item.priority === 'Critical' || item.status === 'Critical';
+                const isUrgent = item.priority === 'Urgent' || item.status === 'Urgent';
+                const urgencyBorder = isCritical ? '4px solid #EF4444' : isUrgent ? '4px solid #F59E0B' : '4px solid #10B981';
+                const urgencyBg = isCritical ? '#FEF2F2' : isUrgent ? '#FFFBEB' : '#ECFDF5';
+                const urgencyColor = isCritical ? '#B91C1C' : isUrgent ? '#B45309' : '#047857';
+
                 return (
                   <div
                     key={idx}
                     style={{
                       backgroundColor: '#FFFFFF',
-                      border: `1px solid ${isUrgent ? '#FCA5A5' : '#E2E8F0'}`,
+                      border: `1px solid ${isCritical ? '#FECACA' : isUrgent ? '#FDE68A' : '#E2E8F0'}`,
+                      borderLeft: urgencyBorder,
                       borderRadius: 'var(--medx-radius-md)',
-                      padding: '1rem 1.25rem',
+                      padding: '0.875rem 1.125rem',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       flexWrap: 'wrap',
-                      gap: '1rem',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                      gap: '0.875rem',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
                       <div style={{
                         width: '36px',
                         height: '36px',
-                        borderRadius: '50%',
-                        backgroundColor: isUrgent ? '#FEE2E2' : '#F1F5F9',
-                        color: isUrgent ? '#DC2626' : 'var(--medx-navy)',
+                        borderRadius: '6px',
+                        backgroundColor: isCritical ? '#FEE2E2' : isUrgent ? '#FEF3C7' : '#F1F5F9',
+                        color: isCritical ? '#DC2626' : isUrgent ? '#D97706' : '#334155',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '0.875rem'
+                        fontWeight: 800,
+                        fontSize: '0.8125rem',
+                        border: `1px solid ${isCritical ? '#FCA5A5' : isUrgent ? '#FDE68A' : '#CBD5E1'}`
                       }}>
                         #{item.tokenNumber}
                       </div>
 
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontWeight: 700, color: 'var(--medx-navy)', fontSize: '0.9375rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 800, color: 'var(--medx-navy)', fontSize: '0.95rem' }}>
                             {item.patientName}
                           </span>
                           <span style={{
-                            fontSize: '0.75rem',
-                            padding: '0.125rem 0.5rem',
+                            fontSize: '0.6875rem',
+                            padding: '0.15rem 0.5rem',
                             borderRadius: '9999px',
-                            fontWeight: 600,
-                            backgroundColor: isUrgent ? '#FEE2E2' : '#EFF6FF',
-                            color: isUrgent ? '#DC2626' : '#2563EB'
+                            fontWeight: 700,
+                            letterSpacing: '0.04em',
+                            textTransform: 'uppercase',
+                            backgroundColor: urgencyBg,
+                            color: urgencyColor,
+                            border: `1px solid ${isCritical ? '#FCA5A5' : isUrgent ? '#FDE68A' : '#A7F3D0'}`
                           }}>
-                            {item.priority}
+                            {item.priority || 'Routine'}
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.8125rem', color: 'var(--medx-text-secondary)', marginTop: '0.25rem' }}>
-                          {item.gender} • {item.age} yrs • Blood: {item.bloodGroup} • Est. Wait: <strong>{item.estimatedWaitTime}</strong>
+                        <div style={{ fontSize: '0.78125rem', color: 'var(--medx-text-secondary)', marginTop: '0.2rem' }}>
+                          {item.gender} • {item.age} yrs • Blood: <strong style={{ color: 'var(--medx-navy)' }}>{item.bloodGroup}</strong> • Est. Wait: <strong>{item.estimatedWaitTime}</strong>
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         className="medx-btn medx-btn-secondary"
-                        style={{ fontSize: '0.8125rem', padding: '0.375rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        style={{ fontSize: '0.78125rem', padding: '0.35rem 0.625rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
                         onClick={async () => {
                           try {
                             const res = await api.get(`/doctor/patients/${item.patientId}`);
@@ -331,7 +342,23 @@ export function DoctorWorkstation({
                           }
                         }}
                       >
-                        <Eye size={14} /> Dossier
+                        <Eye size={13} /> Dossier
+                      </button>
+
+                      <button
+                        type="button"
+                        className="medx-btn medx-btn-secondary"
+                        style={{ fontSize: '0.78125rem', padding: '0.35rem 0.625rem', display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#6D28D9', borderColor: '#DDD6FE' }}
+                        onClick={async () => {
+                          try {
+                            const res = await api.get(`/doctor/patients/${item.patientId}`);
+                            onOpenPrescription(res.data);
+                          } catch (err) {
+                            onOpenPrescription({ name: item.patientName, id: item.patientId });
+                          }
+                        }}
+                      >
+                        <Pill size={13} /> Prescribe
                       </button>
 
                       <button
@@ -340,8 +367,8 @@ export function DoctorWorkstation({
                         style={{
                           backgroundColor: '#10B981',
                           color: '#FFFFFF',
-                          fontSize: '0.8125rem',
-                          padding: '0.375rem 0.75rem',
+                          fontSize: '0.78125rem',
+                          padding: '0.35rem 0.625rem',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.25rem'
@@ -355,7 +382,7 @@ export function DoctorWorkstation({
                           }
                         }}
                       >
-                        <Phone size={14} /> Consult
+                        <Phone size={13} /> Consult
                       </button>
                     </div>
                   </div>
