@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
   ShieldCheck, Building2, LayoutDashboard,
-  ListOrdered, BedDouble, Users, Stethoscope, AlertOctagon
+  ListOrdered, BedDouble, Users, Stethoscope, AlertOctagon,
+  Settings, Layers
 } from 'lucide-react';
 import HospitalDashboard from '../hospital/HospitalDashboard.jsx';
 import HospitalCareQueue from '../hospital/HospitalCareQueue.jsx';
@@ -10,6 +11,8 @@ import HospitalBeds from '../hospital/HospitalBeds.jsx';
 import HospitalPatients from '../hospital/HospitalPatients.jsx';
 import HospitalDoctors from '../hospital/HospitalDoctors.jsx';
 import HospitalEmergency from '../hospital/HospitalEmergency.jsx';
+import HospitalDepartments from '../hospital/HospitalDepartments.jsx';
+import HospitalProfile from '../hospital/HospitalProfile.jsx';
 import emergencyService from '../../services/emergencyService.js';
 
 export function HospitalWorkspace() {
@@ -69,6 +72,20 @@ export function HospitalWorkspace() {
       label: 'Physician Roster',
       shortLabel: 'Physicians',
       icon: Stethoscope,
+      badge: null
+    },
+    {
+      id: 'departments',
+      label: 'Clinical Departments',
+      shortLabel: 'Departments',
+      icon: Layers,
+      badge: null
+    },
+    {
+      id: 'profile-settings',
+      label: 'Facility Profile & Settings',
+      shortLabel: 'Facility Settings',
+      icon: Settings,
       badge: null
     },
     {
@@ -387,6 +404,8 @@ export function HospitalWorkspace() {
         {activeTab === 'beds' && <HospitalBeds />}
         {activeTab === 'patients' && <HospitalPatients />}
         {activeTab === 'doctors' && <HospitalDoctors />}
+        {activeTab === 'departments' && <HospitalDepartments />}
+        {activeTab === 'profile-settings' && <HospitalProfile />}
         {activeTab === 'emergency' && <HospitalEmergency />}
       </main>
     </div>

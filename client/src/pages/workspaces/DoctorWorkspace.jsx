@@ -8,11 +8,14 @@ import DoctorWorkstation from '../doctor/DoctorWorkstation.jsx';
 import DoctorPatients from '../doctor/DoctorPatients.jsx';
 import DoctorReports from '../doctor/DoctorReports.jsx';
 import DoctorEmergency from '../doctor/DoctorEmergency.jsx';
+import DoctorAppointments from '../doctor/DoctorAppointments.jsx';
+import DoctorAvailability from '../doctor/DoctorAvailability.jsx';
 import DoctorPatientModal from '../doctor/DoctorPatientModal.jsx';
 import DoctorPrescriptionModal from '../doctor/DoctorPrescriptionModal.jsx';
 import DoctorCallModal from '../doctor/DoctorCallModal.jsx';
 import DoctorReportReviewModal from '../doctor/DoctorReportReviewModal.jsx';
 import emergencyService from '../../services/emergencyService.js';
+import { Calendar } from 'lucide-react';
 
 export function DoctorWorkspace() {
   const { user, profile, role } = useAuth();
@@ -165,6 +168,50 @@ export function DoctorWorkspace() {
 
         <button
           type="button"
+          onClick={() => setActiveTab('appointments')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'appointments' ? '#15803D' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'appointments' ? '2px solid #15803D' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Calendar size={18} />
+          Appointments Workspace
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('availability')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: activeTab === 'availability' ? '#15803D' : 'var(--medx-text-secondary)',
+            border: 'none',
+            borderBottom: activeTab === 'availability' ? '2px solid #15803D' : '2px solid transparent',
+            background: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Clock size={18} />
+          Schedule & Availability
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('emergency')}
           style={{
             display: 'flex',
@@ -215,6 +262,18 @@ export function DoctorWorkspace() {
           onOpenCall={(p) => setCallPatient(p)}
           onOpenPrescription={(p) => setPrescriptionPatient(p)}
         />
+      )}
+
+      {activeTab === 'appointments' && (
+        <DoctorAppointments
+          onSelectPatient={(p) => setSelectedPatient(p)}
+          onOpenCall={(p) => setCallPatient(p)}
+          onOpenPrescription={(p) => setPrescriptionPatient(p)}
+        />
+      )}
+
+      {activeTab === 'availability' && (
+        <DoctorAvailability />
       )}
 
       {activeTab === 'reports' && (
