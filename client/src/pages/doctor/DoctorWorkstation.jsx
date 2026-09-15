@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
   Activity, Users, FileText, Pill, Clock, CheckCircle2,
-  AlertTriangle, Phone, Stethoscope, RefreshCw, ChevronRight, Eye
+  AlertTriangle, Phone, Stethoscope, RefreshCw, ChevronRight, Eye, Sparkles
 } from 'lucide-react';
 import api from '../../services/api.js';
+
+const CLINICAL_QUOTES = [
+  { quote: "Wherever the art of Medicine is loved, there is also a love of Humanity.", author: "Hippocrates" },
+  { quote: "The good physician treats the disease; the great physician treats the patient who has the disease.", author: "Sir William Osler" },
+  { quote: "Medicine is a science of uncertainty and an art of probability.", author: "Sir William Osler" },
+  { quote: "To cure sometimes, to relieve often, to comfort always.", author: "Edward Livingston Trudeau" },
+  { quote: "Care more particularly for the individual patient than for the special features of the disease.", author: "Sir William Osler" }
+];
 
 export function DoctorWorkstation({
   onSelectPatient,
@@ -18,6 +26,7 @@ export function DoctorWorkstation({
   const [emergencyCount, setEmergencyCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [quoteIdx, setQuoteIdx] = useState(0);
 
   const loadWorkstationData = async () => {
     try {
@@ -174,6 +183,38 @@ export function DoctorWorkstation({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Inspirational Clinical Perspective (Doctor Baseline Preservation) */}
+      <div style={{
+        backgroundColor: '#F3EEFF',
+        border: '1px solid #DDD6FE',
+        borderRadius: 'var(--medx-radius-md)',
+        padding: '0.75rem 1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1rem',
+        color: '#5B21B6'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Sparkles size={18} style={{ color: '#7C3AED', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.875rem', fontStyle: 'italic', fontWeight: 500 }}>
+            "{CLINICAL_QUOTES[quoteIdx].quote}"
+          </span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7C3AED', whiteSpace: 'nowrap' }}>
+            — {CLINICAL_QUOTES[quoteIdx].author}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setQuoteIdx((prev) => (prev + 1) % CLINICAL_QUOTES.length)}
+          className="medx-btn medx-btn-outline"
+          style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderColor: '#C4B5FD', color: '#6D28D9', borderRadius: '4px' }}
+          title="Rotate clinical perspective"
+        >
+          Next Quote
+        </button>
       </div>
 
       {/* Main Workstation Layout: Queue on Left, Action Center on Right */}

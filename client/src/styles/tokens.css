@@ -1,21 +1,30 @@
 /**
  * Med-X Unified Design Tokens
  * Source: Jankoti Brand System & Phase 1C Contract
+ * Cross-Page Visual Identity Pass: Cohesive DNA across authentic workspaces
  */
 :root {
   /* Core Brand Colors */
   --medx-primary: #6D28D9;
   --medx-primary-hover: #5B21B6;
   --medx-primary-light: #EDE9FE;
+  --medx-primary-subtle: rgba(109, 40, 217, 0.08);
+  --medx-primary-glow: rgba(109, 40, 217, 0.15);
   --medx-secondary: #0284C7;
+  --medx-secondary-light: #E0F2FE;
   --medx-navy: #0F172A;
   --medx-navy-light: #1E293B;
 
-  /* Surfaces & Backgrounds */
-  --medx-bg: #F8FAFC;
+  /* Canvas & Structural Neutrals */
+  --medx-canvas: #FAF9F6;
+  --medx-canvas-subtle: #F4F2EE;
+  --medx-bg: #F6F7FB;
   --medx-surface: #FFFFFF;
-  --medx-surface-muted: #F1F5F9;
+  --medx-surface-muted: #F8FAFC;
+  --medx-surface-highlight: #F4F2FF;
   --medx-border: #E2E8F0;
+  --medx-border-tactile: rgba(148, 163, 184, 0.24);
+  --medx-border-strong: rgba(148, 163, 184, 0.38);
   --medx-border-focus: #8B5CF6;
 
   /* Typography Colors */
@@ -27,26 +36,38 @@
   /* Clinical Status Accents (Never rely on color alone) */
   --medx-status-normal: #10B981;
   --medx-status-normal-bg: #ECFDF5;
+  --medx-status-normal-border: #A7F3D0;
+
   --medx-status-warning: #F59E0B;
   --medx-status-warning-bg: #FFFBEB;
+  --medx-status-warning-border: #FDE68A;
+
   --medx-status-danger: #EF4444;
   --medx-status-danger-bg: #FEF2F2;
+  --medx-status-danger-border: #FECACA;
+
   --medx-status-critical: #991B1B;
   --medx-status-critical-bg: #FEE2E2;
+  --medx-status-critical-border: #FCA5A5;
 
-  /* Typography */
+  /* Typography Stack */
+  --medx-font-display: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --medx-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --medx-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Shadows */
-  --medx-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --medx-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --medx-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Elevation & Glow Shadows */
+  --medx-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --medx-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --medx-shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.1), 0 4px 10px -4px rgba(15, 23, 42, 0.05);
+  --medx-glow: 0 18px 40px rgba(17, 24, 39, 0.08);
+  --medx-glow-primary: 0 0 24px rgba(109, 40, 217, 0.12);
+  --medx-ring: 0 0 0 3px rgba(109, 40, 217, 0.18);
 
   /* Border Radius */
-  --medx-radius-sm: 4px;
-  --medx-radius-md: 8px;
-  --medx-radius-lg: 12px;
-  --medx-radius-xl: 16px;
+  --medx-radius-sm: 6px;
+  --medx-radius-md: 10px;
+  --medx-radius-lg: 14px;
+  --medx-radius-xl: 20px;
   --medx-radius-full: 9999px;
 
   /* Transitions */
