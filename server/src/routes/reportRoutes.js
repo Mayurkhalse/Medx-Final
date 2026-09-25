@@ -9,6 +9,10 @@ import {
   getReportById,
   getBiomarkerTrends
 } from '../controllers/reportController.js';
+import {
+  submitPatientSymptoms,
+  getPatientSymptomHistory
+} from '../controllers/patientSymptomController.js';
 
 const router = Router();
 
@@ -30,6 +34,10 @@ const handleFileUpload = (req, res, next) => {
 };
 
 const patientAuth = [requireAuth, requireRole(['patient'])];
+
+// Symptom Intake & History (mapped to relational patients & medical_records)
+router.post('/symptoms', ...patientAuth, submitPatientSymptoms);
+router.get('/symptoms', ...patientAuth, getPatientSymptomHistory);
 
 // Ingestion endpoints
 router.post('/', ...patientAuth, createManualReport);

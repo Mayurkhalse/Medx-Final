@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getWorkspacePathForRole, isPathAllowedForRole } from '../utils/roleUtils.js';
 import { Activity, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, Stethoscope, Building2, FlaskConical, User } from 'lucide-react';
 import jankotiLogo from '../assets/jankoti-logo.png';
 import MedXLogo from '../components/MedXLogo.jsx';
@@ -16,11 +17,11 @@ export function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const { login } = useAuth();
+  const { user, isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || null;
+  const from = location.state?.from;
 
   useEffect(() => {
     const roleParam = searchParams.get('role');
@@ -43,19 +44,15 @@ export function LoginPage() {
       setLoading(true);
       setErrorMsg('');
       const data = await login(email, password);
+      const userRole = data?.user?.role || role;
 
-      // Navigate to intended destination or user's authorized workspace
-      if (from) {
-        navigate(from, { replace: true });
-      } else {
-        switch (data.user.role) {
-          case 'patient': navigate('/patient'); break;
-          case 'doctor': navigate('/doctor'); break;
-          case 'hospital_admin': navigate('/hospital'); break;
-          case 'lab_admin': navigate('/lab'); break;
-          default: navigate('/');
-        }
+      // Determine role workspace path dynamically
+      let redirectPath = getWorkspacePathForRole(userRole);
+      if (from?.pathname && isPathAllowedForRole(from.pathname, userRole)) {
+        redirectPath = from.pathname + (from.search || '');
       }
+
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       setErrorMsg(err.response?.data?.error?.message || 'Login failed. Please verify credentials.');
     } finally {

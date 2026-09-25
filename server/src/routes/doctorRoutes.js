@@ -13,7 +13,9 @@ import {
   getDoctorReports,
   getDoctorReportById,
   reviewMedicalReport,
-  getDoctorQueue
+  getDoctorQueue,
+  getDoctorAppointments,
+  createDoctorAppointment
 } from '../controllers/doctorController.js';
 
 const router = Router();
@@ -39,6 +41,10 @@ router.get('/patients/:id', requireAuth, requireRole(['doctor']), getDoctorPatie
 router.post('/patients/:id/prescriptions', requireAuth, requireRole(['doctor']), addPrescription);
 router.post('/patients/:id/notes', requireAuth, requireRole(['doctor']), addClinicalNote);
 router.post('/patients/:id/followups', requireAuth, requireRole(['doctor']), addFollowup);
+
+// Appointments (relational appointments table)
+router.get('/appointments', requireAuth, requireRole(['doctor']), getDoctorAppointments);
+router.post('/appointments', requireAuth, requireRole(['doctor']), createDoctorAppointment);
 
 // Canonical MedicalReport retrieval & review
 router.get('/reports', requireAuth, requireRole(['doctor']), getDoctorReports);

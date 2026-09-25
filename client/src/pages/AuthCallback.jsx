@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import authService from '../services/authService.js';
+import { getWorkspacePathForRole } from '../utils/roleUtils.js';
 
 export function AuthCallback() {
   const [searchParams] = useSearchParams();
@@ -12,8 +13,12 @@ export function AuthCallback() {
     const token = searchParams.get('token');
     if (token) {
       authService.setToken(token);
-      checkAuth().then(() => {
-        navigate('/', { replace: true });
+      checkAuth().then((data) => {
+        const role = data?.user?.role;
+        const redirectPath = getWorkspacePathForRole(role);
+        navigate(redirectPath, { replace: true });
+      }).catch(() => {
+        navigate('/login?error=auth_failed', { replace: true });
       });
     } else {
       navigate('/login?error=oauth_failed', { replace: true });

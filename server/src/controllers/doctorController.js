@@ -532,6 +532,48 @@ export async function getDoctorQueue(req, res, next) {
   }
 }
 
+/**
+ * Get doctor appointments mapped to relational appointments table
+ */
+export async function getDoctorAppointments(req, res, next) {
+  try {
+    const { getRelationalAppointments } = await import('../models/pgRelational.js');
+    const appointments = await getRelationalAppointments({ doctor_id: req.user._id || req.user.id });
+    return res.status(200).json(appointments);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Create new appointment for DoctorPage3 mapped to relational appointments table
+ */
+export async function createDoctorAppointment(req, res, next) {
+  try {
+    const { createRelationalAppointment } = await import('../models/pgRelational.js');
+    const { patient_id, appointment_date, time_slot, type, triage_stage, symptoms, notes } = req.body;
+    
+    const appointment = await createRelationalAppointment({
+      patient_id: patient_id || 1,
+      doctor_id: req.user._id || req.user.id,
+      clinic_id: 1,
+      appointment_date,
+      time_slot,
+      type,
+      triage_stage,
+      symptoms,
+      notes
+    });
+
+    return res.status(201).json({
+      message: 'Appointment successfully created in relational appointments table.',
+      appointment
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   getDoctorProfile,
   updateDoctorProfile,
@@ -544,5 +586,7 @@ export default {
   getDoctorReports,
   getDoctorReportById,
   reviewMedicalReport,
-  getDoctorQueue
+  getDoctorQueue,
+  getDoctorAppointments,
+  createDoctorAppointment
 };

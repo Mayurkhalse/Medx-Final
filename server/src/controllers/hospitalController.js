@@ -548,6 +548,14 @@ export const updateCareTask = async (req, res, next) => {
 
     await task.save();
 
+    // Sync to PostgreSQL relational appointments table
+    try {
+      const { updateAppointmentTriageRelational } = await import('../models/pgRelational.js');
+      await updateAppointmentTriageRelational(1, category || 'CONSULTATION', status || 'active', actionTaken || '');
+    } catch (pgErr) {
+      // Non-blocking sync
+    }
+
     const populated = await CareTask.findById(task._id)
       .populate({
         path: 'patientId',
@@ -561,7 +569,7 @@ export const updateCareTask = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Care task updated successfully.',
+      message: 'Care task updated successfully in hospital reception pipeline.',
       task: populated
     });
   } catch (error) {

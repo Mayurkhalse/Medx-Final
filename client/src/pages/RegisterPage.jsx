@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getWorkspacePathForRole } from '../utils/roleUtils.js';
 import { Activity, AlertCircle, ArrowRight, User, Stethoscope, Building2, FlaskConical } from 'lucide-react';
 import jankotiLogo from '../assets/jankoti-logo.png';
 import MedXLogo from '../components/MedXLogo.jsx';
@@ -20,7 +21,7 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const { register } = useAuth();
+  const { user, isAuthenticated, register } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,8 +46,8 @@ export function RegisterPage() {
         labName,
         specialty
       });
-      const userRole = data.user.role;
-      const redirectTo = `/${userRole === 'patient' ? 'patient' : userRole === 'doctor' ? 'doctor' : userRole === 'hospital_admin' ? 'hospital' : 'lab'}`;
+      const userRole = data?.user?.role || role;
+      const redirectTo = getWorkspacePathForRole(userRole);
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setErrorMsg(err.response?.data?.error?.message || err.message || 'Registration failed. Please check inputs.');
