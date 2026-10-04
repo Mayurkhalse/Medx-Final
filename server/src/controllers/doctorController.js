@@ -4,6 +4,7 @@ import { Patient } from '../models/Patient.js';
 import { User } from '../models/User.js';
 import { MedicalReport } from '../models/MedicalReport.js';
 import { Prescription } from '../models/Prescription.js';
+import { Appointment } from '../models/Appointment.js';
 
 /**
  * Get authenticated doctor profile.
@@ -504,74 +505,245 @@ export async function getDoctorQueue(req, res, next) {
       return res.status(404).json({ error: { code: 'DOCTOR_NOT_FOUND', message: 'Doctor profile not found.' } });
     }
 
-    // Queue of patients assigned or needing review
-    const patients = await Patient.find({
+    // 1. Fetch appointments for this doctor (excluding cancelled)
+    const appointments = await Appointment.find({
+      doctorId: doctor._id,
+      status: { $ne: 'Cancelled' }
+    })
+      .populate({
+        path: 'patientId',
+        populate: { path: 'userId', select: 'name email phone avatar' }
+      })
+      .sort({ appointmentDate: 1, timeSlot: 1 });
+
+    // 2. Fetch any assigned patients who are actively Waiting or In Consultation
+    const activePatients = await Patient.find({
       $or: [
-        { primaryDoctorId: doctor._id },
-        { status: { $in: ['Waiting', 'Critical', 'In Consultation'] } }
+        { primaryDoctorId: doctor._id, status: { $in: ['Waiting', 'In Consultation', 'Critical'] } },
+        { status: { $in: ['Waiting', 'In Consultation', 'Critical'] } }
       ]
     }).populate('userId', 'name email phone avatar');
 
-    const queue = patients.map((p, idx) => ({
-      tokenNumber: idx + 1,
-      patientId: p.legacyId || p._id,
-      patientName: p.userId?.name || 'Registered Patient',
-      age: p.dateOfBirth ? Math.floor((Date.now() - new Date(p.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 42,
-      gender: p.gender,
-      bloodGroup: p.bloodGroup,
-      visitType: p.status === 'Critical' ? 'Urgent Diagnostic Review' : 'Outpatient Consultation',
-      status: p.status || 'Waiting',
-      priority: p.status === 'Critical' ? 'Urgent' : 'Routine',
-      vitalSigns: p.vitalSigns,
-      estimatedWaitTime: `${(idx + 1) * 12} mins`
-    }));
+    // 3. Consolidate into unified live queue
+    const queueMap = new Map();
 
-    return res.status(200).json(queue);
+    // Ingest appointments first
+    appointments.forEach((apt) => {
+      const pat = apt.patientId;
+      const user = pat?.userId || {};
+      const patIdStr = pat?._id?.toString() || apt._id.toString();
+
+      const normalizedStatus = apt.status === 'In Consultation' ? 'In-Consultation' : apt.status;
+      const isWaiting = normalizedStatus === 'Waiting';
+      const isInside = normalizedStatus === 'In-Consultation';
+      const isUpcoming = normalizedStatus === 'Scheduled' || normalizedStatus === 'Confirmed';
+
+      queueMap.set(patIdStr, {
+        appointmentId: apt._id,
+        patientDocId: pat?._id,
+        patientId: pat?.legacyId || pat?._id || apt._id,
+        patientName: user.name || 'Patient',
+        patientEmail: user.email || '',
+        patientPhone: user.phone || '',
+        patientAvatar: user.avatar || '',
+        age: pat?.dateOfBirth ? Math.floor((Date.now() - new Date(pat.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 38,
+        gender: pat?.gender || 'Unspecified',
+        bloodGroup: pat?.bloodGroup || 'O+',
+        timeSlot: apt.timeSlot || '10:00 AM',
+        appointmentDate: apt.appointmentDate,
+        visitType: apt.type || 'In-Person',
+        status: normalizedStatus,
+        isWaitingOutside: isWaiting,
+        isCurrentlyInside: isInside,
+        isUpcoming: isUpcoming,
+        priority: normalizedStatus === 'In-Consultation' ? 'Current' : (isWaiting ? 'Urgent' : 'Routine'),
+        reason: apt.reason || pat?.currentCondition || 'Clinical Consultation',
+        notes: apt.notes || '',
+        queueToken: apt.queueToken || null,
+        arrivedAt: apt.arrivedAt || null,
+        vitalSigns: pat?.vitalSigns || {},
+        source: 'appointment'
+      });
+    });
+
+    // Ingest any active waiting/in-consultation patients not in appointment list
+    activePatients.forEach((pat) => {
+      const patIdStr = pat._id.toString();
+      if (!queueMap.has(patIdStr)) {
+        const user = pat.userId || {};
+        const isWaiting = pat.status === 'Waiting';
+        const isInside = pat.status === 'In Consultation' || pat.status === 'In-Consultation';
+
+        queueMap.set(patIdStr, {
+          appointmentId: null,
+          patientDocId: pat._id,
+          patientId: pat.legacyId || pat._id,
+          patientName: user.name || 'Walk-in Patient',
+          patientEmail: user.email || '',
+          patientPhone: user.phone || '',
+          patientAvatar: user.avatar || '',
+          age: pat.dateOfBirth ? Math.floor((Date.now() - new Date(pat.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 42,
+          gender: pat.gender || 'Unspecified',
+          bloodGroup: pat.bloodGroup || 'A+',
+          timeSlot: 'Walk-in Triage',
+          appointmentDate: new Date(),
+          visitType: pat.status === 'Critical' ? 'Emergency Review' : 'Outpatient Walk-in',
+          status: isInside ? 'In-Consultation' : (isWaiting ? 'Waiting' : pat.status),
+          isWaitingOutside: isWaiting,
+          isCurrentlyInside: isInside,
+          isUpcoming: false,
+          priority: isInside ? 'Current' : (pat.status === 'Critical' ? 'Critical' : 'Urgent'),
+          reason: pat.currentCondition || 'Outpatient Triage Evaluation',
+          notes: '',
+          queueToken: null,
+          arrivedAt: new Date(),
+          vitalSigns: pat.vitalSigns || {},
+          source: 'patient_roster'
+        });
+      }
+    });
+
+    // 4. Sort and assign sequential tokens
+    const queueList = Array.from(queueMap.values());
+
+    // Priority rank: In-Consultation (0) -> Waiting Outside (1) -> Confirmed/Scheduled (2) -> Completed (3)
+    queueList.sort((a, b) => {
+      const rank = (item) => {
+        if (item.isCurrentlyInside) return 0;
+        if (item.isWaitingOutside) return 1;
+        if (item.status === 'Confirmed') return 2;
+        if (item.status === 'Scheduled') return 3;
+        if (item.status === 'Completed') return 4;
+        return 5;
+      };
+      const rankDiff = rank(a) - rank(b);
+      if (rankDiff !== 0) return rankDiff;
+      // Secondary sort: timeSlot
+      return (a.timeSlot || '').localeCompare(b.timeSlot || '');
+    });
+
+    // Decorate with tokenNumber & dynamic estimatedWaitTime
+    let waitingCounter = 1;
+    const finalQueue = queueList.map((item, idx) => {
+      const tokenNumber = item.queueToken || idx + 1;
+      let waitDisplay = 'Upcoming';
+      if (item.isCurrentlyInside) {
+        waitDisplay = 'In Cabin (Now)';
+      } else if (item.isWaitingOutside) {
+        waitDisplay = waitingCounter === 1 ? 'Next in Line (0 min)' : `${(waitingCounter - 1) * 15} mins`;
+        waitingCounter++;
+      } else if (item.status === 'Completed') {
+        waitDisplay = 'Completed';
+      } else {
+        waitDisplay = `Scheduled ${item.timeSlot}`;
+      }
+
+      return {
+        ...item,
+        tokenNumber,
+        estimatedWaitTime: waitDisplay
+      };
+    });
+
+    return res.status(200).json(finalQueue);
   } catch (error) {
     next(error);
   }
 }
 
 /**
- * Get doctor appointments mapped to relational appointments table
+ * Update patient/appointment queue status (Admit to Cabin, Mark Waiting Outside, Complete Visit)
+ * PATCH /api/doctor/queue/:id/status
+ */
+export async function updateDoctorQueueStatus(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body; // status: 'Waiting' | 'In-Consultation' | 'Completed' | 'No-Show'
+
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({ error: { code: 'DOCTOR_NOT_FOUND', message: 'Doctor profile not found.' } });
+    }
+
+    // Try finding by Appointment ID first
+    let appointment = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      appointment = await Appointment.findById(id);
+    }
+
+    if (appointment) {
+      appointment.status = status;
+      if (notes) appointment.notes = notes;
+      if (status === 'Waiting') {
+        appointment.arrivedAt = appointment.arrivedAt || new Date();
+        if (!appointment.queueToken) {
+          const maxToken = await Appointment.findOne({ doctorId: doctor._id }).sort({ queueToken: -1 });
+          appointment.queueToken = (maxToken?.queueToken || 0) + 1;
+        }
+        await Patient.findByIdAndUpdate(appointment.patientId, { status: 'Waiting' });
+      } else if (status === 'In-Consultation' || status === 'In Consultation') {
+        appointment.status = 'In-Consultation';
+        appointment.consultationStartedAt = new Date();
+        await Patient.findByIdAndUpdate(appointment.patientId, { status: 'In Consultation' });
+      } else if (status === 'Completed') {
+        appointment.consultationEndedAt = new Date();
+        await Patient.findByIdAndUpdate(appointment.patientId, { status: 'Active' });
+      }
+      await appointment.save();
+
+      return res.status(200).json({
+        message: `Queue status updated to ${status}`,
+        appointment
+      });
+    }
+
+    // If not appointment, check if ID is Patient ID or legacy ID
+    let patient = await Patient.findOne({
+      $or: [
+        ...(mongoose.Types.ObjectId.isValid(id) ? [{ _id: id }] : []),
+        { legacyId: id }
+      ]
+    });
+
+    if (patient) {
+      const patStatus = status === 'In-Consultation' ? 'In Consultation' : (status === 'Completed' ? 'Active' : status);
+      patient.status = patStatus;
+      await patient.save();
+
+      return res.status(200).json({
+        message: `Patient triage status updated to ${patStatus}`,
+        patient
+      });
+    }
+
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Queue record not found.' } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Get doctor appointments mapped to canonical Appointment collection
  */
 export async function getDoctorAppointments(req, res, next) {
-  try {
-    const { getRelationalAppointments } = await import('../models/pgRelational.js');
-    const appointments = await getRelationalAppointments({ doctor_id: req.user._id || req.user.id });
-    return res.status(200).json(appointments);
-  } catch (error) {
-    next(error);
-  }
+  const { getAppointments } = await import('./appointmentController.js');
+  return getAppointments(req, res, next);
 }
 
 /**
- * Create new appointment for DoctorPage3 mapped to relational appointments table
+ * Create new appointment mapped to canonical Appointment collection
  */
 export async function createDoctorAppointment(req, res, next) {
-  try {
-    const { createRelationalAppointment } = await import('../models/pgRelational.js');
-    const { patient_id, appointment_date, time_slot, type, triage_stage, symptoms, notes } = req.body;
-    
-    const appointment = await createRelationalAppointment({
-      patient_id: patient_id || 1,
-      doctor_id: req.user._id || req.user.id,
-      clinic_id: 1,
-      appointment_date,
-      time_slot,
-      type,
-      triage_stage,
-      symptoms,
-      notes
-    });
+  const { createAppointment } = await import('./appointmentController.js');
+  return createAppointment(req, res, next);
+}
 
-    return res.status(201).json({
-      message: 'Appointment successfully created in relational appointments table.',
-      appointment
-    });
-  } catch (error) {
-    next(error);
-  }
+/**
+ * Update an appointment (Accept, Reschedule, Cancel, Complete)
+ */
+export async function updateDoctorAppointment(req, res, next) {
+  const { updateAppointment } = await import('./appointmentController.js');
+  return updateAppointment(req, res, next);
 }
 
 export default {
@@ -588,5 +760,6 @@ export default {
   reviewMedicalReport,
   getDoctorQueue,
   getDoctorAppointments,
-  createDoctorAppointment
+  createDoctorAppointment,
+  updateDoctorAppointment
 };

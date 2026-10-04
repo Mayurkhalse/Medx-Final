@@ -43,13 +43,29 @@ const appointmentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Scheduled', 'Confirmed', 'Completed', 'Cancelled'],
+      enum: ['Scheduled', 'Confirmed', 'Waiting', 'In-Consultation', 'Completed', 'Cancelled', 'No-Show'],
       default: 'Scheduled',
       index: true
     },
+    queueToken: {
+      type: Number,
+      default: null
+    },
+    arrivedAt: {
+      type: Date,
+      default: null
+    },
+    consultationStartedAt: {
+      type: Date,
+      default: null
+    },
+    consultationEndedAt: {
+      type: Date,
+      default: null
+    },
     type: {
       type: String,
-      enum: ['In-Person', 'Video', 'Follow-up'],
+      enum: ['In-Person', 'Video', 'Follow-up', 'In-Person Clinical', 'Online Video', 'Consultation', 'Routine', 'Emergency'],
       default: 'In-Person'
     },
     reason: {
@@ -78,7 +94,7 @@ const appointmentSchema = new mongoose.Schema(
 // Pre-save hook to generate human-readable legacyId if not provided
 appointmentSchema.pre('save', function (next) {
   if (!this.legacyId) {
-    this.legacyId = `APT-${Math.floor(100 + Math.random() * 900)}`;
+    this.legacyId = `APT-${Math.floor(100000 + Math.random() * 900000)}`;
   }
   next();
 });

@@ -28,13 +28,14 @@ import {
   ChevronRight,
   Home,
   HelpCircle,
-  PhoneCall
+  PhoneCall,
+  PanelLeftClose
 } from 'lucide-react';
 import MedXLogo from './MedXLogo.jsx';
 import jankotiLogo from '../assets/jankoti-logo.png';
 import ManageProfileModal from './ManageProfileModal.jsx';
 
-export function Sidebar({ mobileOpen, setMobileOpen }) {
+export function Sidebar({ mobileOpen, setMobileOpen, collapsed = false, onToggleCollapse }) {
   const { user, profile, role, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -114,6 +115,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
         return [
           { id: 'dashboard', label: 'Dashboard', path: '/patient?tab=dashboard', icon: LayoutDashboard },
           { id: 'reports', label: 'Reports', path: '/patient?tab=reports', icon: FileText },
+          { id: 'appointments', label: 'Appointments', path: '/patient?tab=appointments', icon: Calendar },
           { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles },
           { id: 'home', label: 'Overview', path: '/', icon: Home }
         ];
@@ -159,7 +161,27 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
 
   const navItems = getRoleNavItems();
   const searchParams = new URLSearchParams(location.search);
-  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : (role === 'patient' ? 'dashboard' : 'dashboard'));
+  const isOverviewPage = location.pathname === '/';
+  const currentTab = isOverviewPage
+    ? 'home'
+    : (searchParams.get('tab') || (role === 'doctor' ? 'workstation' : 'dashboard'));
+
+  const isItemActive = (item) => {
+    // If user is on the root overview landing page ('/')
+    if (isOverviewPage) {
+      return item.id === 'home' || item.path === '/';
+    }
+    // If the item itself points to '/', but we are not on root '/', it is not active
+    if (item.id === 'home' || item.path === '/') {
+      return false;
+    }
+    // Check if the current route matches this item's base workspace route (e.g. /patient vs /doctor)
+    const [itemBasePath] = item.path.split('?');
+    if (location.pathname !== itemBasePath) {
+      return false;
+    }
+    return currentTab === item.id || (item.id === 'biomarkers' && currentTab === 'dashboard');
+  };
 
   const RoleIcon = roleMeta.icon;
 
@@ -173,7 +195,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
       />
 
       {/* Global Vertical Left Sidebar */}
-      <aside className={`medx-sidebar ${mobileOpen ? 'open' : ''}`}>
+      <aside className={`medx-sidebar ${mobileOpen ? 'open' : ''} ${collapsed ? 'collapsed' : ''}`}>
         {/* 1. BRANDING PLACEMENT: MedX / Jankoti Logo anchored at very top */}
         <div style={{
           padding: '1.25rem 1.25rem 1rem 1.25rem',
@@ -222,23 +244,38 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
               </div>
             </Link>
 
-            {/* Mobile close toggle */}
-            <button
-              type="button"
-              className="medx-mobile-close-btn"
-              onClick={() => setMobileOpen(false)}
-              style={{
-                display: 'none',
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                color: '#64748B',
-                padding: '0.25rem'
-              }}
-              aria-label="Close Sidebar"
-            >
-              <X size={20} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              {/* Desktop collapse toggle */}
+              {onToggleCollapse && (
+                <button
+                  type="button"
+                  className="medx-sidebar-collapse-btn"
+                  onClick={onToggleCollapse}
+                  title="Hide navigation bar (Ctrl+B)"
+                  aria-label="Hide navigation bar"
+                >
+                  <PanelLeftClose size={16} />
+                </button>
+              )}
+
+              {/* Mobile close toggle */}
+              <button
+                type="button"
+                className="medx-mobile-close-btn"
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  display: 'none',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#64748B',
+                  padding: '0.25rem'
+                }}
+                aria-label="Close Sidebar"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Active Role/Workspace Badge Header */}
@@ -311,9 +348,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
             {navItems.map((item) => {
               const ItemIcon = item.icon;
-              const isActive = isAuthenticated
-                ? (currentTab === item.id || (item.id === 'biomarkers' && currentTab === 'dashboard'))
-                : (location.pathname === item.path || (location.pathname === '/' && item.path === '/'));
+              const isActive = isItemActive(item);
 
               return (
                 <button

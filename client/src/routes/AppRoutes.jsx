@@ -9,6 +9,7 @@ import LoginPage from '../pages/LoginPage.jsx';
 import RegisterPage from '../pages/RegisterPage.jsx';
 import AuthCallback from '../pages/AuthCallback.jsx';
 import UnauthorizedPage from '../pages/UnauthorizedPage.jsx';
+import CheckInPage from '../pages/CheckInPage.jsx';
 
 // Role Workspace Shells
 import PatientWorkspace from '../pages/workspaces/PatientWorkspace.jsx';
@@ -28,6 +29,8 @@ export function AppRoutes() {
       document.title = 'Sign In | Med-X';
     } else if (path === '/register') {
       document.title = 'Create Account | Med-X';
+    } else if (path.startsWith('/check-in')) {
+      document.title = 'Hospital Self Check-In & Live Queue | Med-X';
     } else if (path.startsWith('/patient')) {
       document.title = 'Patient Health Portal | Med-X';
     } else if (path.startsWith('/doctor')) {
@@ -52,6 +55,16 @@ export function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+        {/* Protected Hospital Self Check-In & Live Queue Tracker */}
+        <Route
+          path="/check-in"
+          element={
+            <ProtectedRoute allowedRoles={['patient', 'doctor', 'hospital_admin']}>
+              <CheckInPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected Patient Workspace */}
         <Route

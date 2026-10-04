@@ -13,7 +13,7 @@ async function startServer() {
     await connectDB();
 
     // Start HTTP Server
-    const server = app.listen(config.PORT, () => {
+    const server = app.listen(config.PORT, '0.0.0.0', () => {
       console.log(`[SERVER] Med-X Unified Express API running on port ${config.PORT}`);
       console.log(`[SERVER] Base API URL: http://localhost:${config.PORT}/api`);
       console.log(`[SERVER] ML Service Boundary configured at: ${config.ML_SERVICE_URL}`);

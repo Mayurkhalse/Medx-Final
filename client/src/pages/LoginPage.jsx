@@ -106,6 +106,59 @@ export function LoginPage() {
           </p>
         </div>
 
+        {/* 1-Click Demo Login Shortcuts */}
+        <div style={{
+          backgroundColor: '#F8FAFC',
+          border: '1px solid #E2E8F0',
+          borderRadius: '10px',
+          padding: '0.875rem 1rem',
+          marginBottom: '1.25rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              ⚡ 1-Click Demo Accounts (Password: Password123!)
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+            {[
+              { role: 'patient', label: 'Patient (John Doe)', email: 'patient@medx.org', pass: 'Password123!', color: '#1D4ED8', bg: '#EFF6FF', border: '#BFDBFE' },
+              { role: 'doctor', label: 'Doctor (Dr. Jenkins)', email: 'doctor@medx.org', pass: 'Password123!', color: '#15803D', bg: '#F0FDF4', border: '#BBF7D0' },
+              { role: 'hospital_admin', label: 'Hospital Admin', email: 'hospital@medx.org', pass: 'Password123!', color: '#7E22CE', bg: '#FAF5FF', border: '#E9D5FF' },
+              { role: 'lab_admin', label: 'Lab Specialist', email: 'lab@medx.org', pass: 'Password123!', color: '#C2410C', bg: '#FFF7ED', border: '#FED7AA' }
+            ].map((acc) => (
+              <button
+                key={acc.email}
+                type="button"
+                onClick={() => {
+                  setRole(acc.role);
+                  setEmail(acc.email);
+                  setPassword(acc.pass);
+                  setErrorMsg('');
+                }}
+                style={{
+                  padding: '0.45rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: acc.color,
+                  backgroundColor: acc.bg,
+                  border: `1px solid ${acc.border}`,
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.15s ease'
+                }}
+                title={`Click to autofill ${acc.email} / ${acc.pass}`}
+              >
+                <span>{acc.label}</span>
+                <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>Fill</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {successMsg && (
           <div className="medx-alert medx-alert-info" style={{ marginBottom: '1.25rem', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1D4ED8', padding: '0.75rem 1rem', borderRadius: '8px', fontSize: '0.875rem' }}>
             <span>{successMsg}</span>
@@ -115,7 +168,12 @@ export function LoginPage() {
         {errorMsg && (
           <div className="medx-alert medx-alert-error" style={{ marginBottom: '1.25rem' }}>
             <AlertCircle size={18} />
-            <span>{errorMsg}</span>
+            <div style={{ flex: 1 }}>
+              <div>{errorMsg}</div>
+              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: '#B91C1C' }}>
+                Tip: Seeded accounts use password <strong>Password123!</strong>. Click any demo account above to autofill.
+              </div>
+            </div>
           </div>
         )}
 

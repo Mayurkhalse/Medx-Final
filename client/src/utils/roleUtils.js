@@ -34,6 +34,7 @@ export function isPathAllowedForRole(pathname, role) {
   if (path === '/' || path === '/login' || path === '/register' || path === '/unauthorized') {
     return false;
   }
+  if (path.startsWith('/check-in')) return true;
   if (path.startsWith('/patient') && role === 'patient') return true;
   if (path.startsWith('/doctor') && role === 'doctor') return true;
   if (path.startsWith('/hospital') && role === 'hospital_admin') return true;

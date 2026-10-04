@@ -121,6 +121,7 @@ export function Navbar() {
         return [
           { id: 'dashboard', label: 'Dashboard', path: '/patient?tab=dashboard', icon: LayoutDashboard },
           { id: 'reports', label: 'Reports', path: '/patient?tab=reports', icon: FileText },
+          { id: 'appointments', label: 'Appointments', path: '/patient?tab=appointments', icon: Calendar },
           { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles }
         ];
       case 'doctor':
@@ -157,7 +158,24 @@ export function Navbar() {
 
   const navItems = getRoleNavItems();
   const searchParams = new URLSearchParams(location.search);
-  const currentTab = searchParams.get('tab') || (role === 'doctor' ? 'workstation' : (role === 'patient' ? 'dashboard' : 'dashboard'));
+  const isOverviewPage = location.pathname === '/';
+  const currentTab = isOverviewPage
+    ? 'home'
+    : (searchParams.get('tab') || (role === 'doctor' ? 'workstation' : 'dashboard'));
+
+  const isItemActive = (item) => {
+    if (isOverviewPage) {
+      return item.id === 'home' || item.path === '/';
+    }
+    if (item.id === 'home' || item.path === '/') {
+      return false;
+    }
+    const [itemBasePath] = item.path.split('?');
+    if (location.pathname !== itemBasePath) {
+      return false;
+    }
+    return currentTab === item.id || (item.id === 'biomarkers' && currentTab === 'dashboard');
+  };
 
   return (
     <>
@@ -247,7 +265,7 @@ export function Navbar() {
             >
               {navItems.map((item) => {
                 const ItemIcon = item.icon;
-                const isActive = currentTab === item.id || (item.id === 'biomarkers' && currentTab === 'dashboard');
+                const isActive = isItemActive(item);
                 return (
                   <button
                     key={item.id}

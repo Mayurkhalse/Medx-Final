@@ -6,6 +6,7 @@ import doctorRoutes from './doctorRoutes.js';
 import hospitalRoutes from './hospitalRoutes.js';
 import labRoutes from './labRoutes.js';
 import emergencyRoutes from './emergencyRoutes.js';
+import appointmentRoutes from './appointmentRoutes.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/roleGuard.js';
 
@@ -19,6 +20,27 @@ router.get('/health', (req, res) => {
     version: '1.0.0',
     timestamp: new Date().toISOString()
   });
+});
+
+// Database Seeding Endpoint
+router.post('/seed', async (req, res, next) => {
+  try {
+    const { seedDatabase } = await import('../seed.js');
+    await seedDatabase();
+    res.status(200).json({
+      success: true,
+      message: 'Database successfully seeded with authentic clinical records across all roles.',
+      credentials: [
+        { role: 'Patient', email: 'patient@medx.org', password: 'Password123!' },
+        { role: 'Patient 2', email: 'emma.watson@medx.org', password: 'Password123!' },
+        { role: 'Doctor', email: 'doctor@medx.org', password: 'Password123!' },
+        { role: 'Hospital Admin', email: 'hospital@medx.org', password: 'Password123!' },
+        { role: 'Lab Admin', email: 'lab@medx.org', password: 'Password123!' }
+      ]
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Authentication Domain (IAM)
@@ -59,6 +81,7 @@ function createReservedDomainRouter(domainName) {
 const patientRouter = Router();
 patientRouter.use('/reports', reportRoutes);
 patientRouter.use('/whatif', whatIfRoutes);
+patientRouter.use('/appointments', appointmentRoutes);
 patientRouter.get('/', requireAuth, requireRole(['patient']), (req, res) => {
   res.status(200).json({
     message: 'Med-X Unified Patient Workspace API',
@@ -90,7 +113,8 @@ router.use('/lab', labRoutes);
 // Emergency Domain Routes (Migrated in Phase 1I)
 router.use('/emergency', emergencyRoutes);
 
-router.use('/appointments', createReservedDomainRouter('appointments'));
+// Unified Appointments Domain
+router.use('/appointments', appointmentRoutes);
 router.use('/triage', createReservedDomainRouter('triage'));
 
 export default router;

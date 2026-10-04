@@ -405,7 +405,87 @@ button, input, select, textarea {
   display: flex;
   flex-direction: column;
   z-index: 50;
-  transition: transform 0.25s ease;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed Navigation Bar State (Desktop) */
+.medx-sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  margin-left: -260px;
+  transform: translateX(-100%);
+  border-right: none !important;
+  overflow: hidden !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.medx-sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: #F8FAFC;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.medx-sidebar-collapse-btn:hover {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+  color: #2563EB;
+}
+
+/* Floating Unhide / Expand Navigation Bar Button */
+.medx-unhide-sidebar-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+  color: #1E293B;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  animation: fadeInSlideRight 0.2s ease-out;
+}
+
+.medx-unhide-sidebar-btn:hover {
+  background: #FFFFFF;
+  border-color: #2563EB;
+  color: #2563EB;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
+}
+
+@keyframes fadeInSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .medx-sidebar-nav-item:hover {
@@ -457,6 +537,14 @@ button, input, select, textarea {
 
   .medx-mobile-close-btn {
     display: flex !important;
+  }
+
+  .medx-sidebar-collapse-btn {
+    display: none !important;
+  }
+
+  .medx-unhide-sidebar-btn {
+    display: none !important;
   }
 
   .medx-sidebar-backdrop.open {

@@ -28,8 +28,7 @@ const patientSchema = new mongoose.Schema(
       default: ''
     },
     address: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.Mixed,
       default: ''
     },
     emergencyContact: {

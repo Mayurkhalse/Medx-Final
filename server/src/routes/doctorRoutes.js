@@ -14,8 +14,10 @@ import {
   getDoctorReportById,
   reviewMedicalReport,
   getDoctorQueue,
+  updateDoctorQueueStatus,
   getDoctorAppointments,
-  createDoctorAppointment
+  createDoctorAppointment,
+  updateDoctorAppointment
 } from '../controllers/doctorController.js';
 
 const router = Router();
@@ -42,17 +44,21 @@ router.post('/patients/:id/prescriptions', requireAuth, requireRole(['doctor']),
 router.post('/patients/:id/notes', requireAuth, requireRole(['doctor']), addClinicalNote);
 router.post('/patients/:id/followups', requireAuth, requireRole(['doctor']), addFollowup);
 
-// Appointments (relational appointments table)
+// Appointments (Canonical Appointment collection)
 router.get('/appointments', requireAuth, requireRole(['doctor']), getDoctorAppointments);
 router.post('/appointments', requireAuth, requireRole(['doctor']), createDoctorAppointment);
+router.patch('/appointments/:id', requireAuth, requireRole(['doctor']), updateDoctorAppointment);
+router.put('/appointments/:id', requireAuth, requireRole(['doctor']), updateDoctorAppointment);
 
 // Canonical MedicalReport retrieval & review
 router.get('/reports', requireAuth, requireRole(['doctor']), getDoctorReports);
 router.get('/reports/:id', requireAuth, requireRole(['doctor']), getDoctorReportById);
 router.put('/reports/:id/review', requireAuth, requireRole(['doctor']), reviewMedicalReport);
 
-// Clinical queue
+// Clinical live queue
 router.get('/queue', requireAuth, requireRole(['doctor']), getDoctorQueue);
+router.patch('/queue/:id/status', requireAuth, requireRole(['doctor']), updateDoctorQueueStatus);
+router.put('/queue/:id/status', requireAuth, requireRole(['doctor']), updateDoctorQueueStatus);
 
 // Unmatched routes under /doctor return 501 DOMAIN_RESERVED
 router.all('*', (req, res) => {

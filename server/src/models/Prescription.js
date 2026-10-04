@@ -69,7 +69,7 @@ const prescriptionSchema = new mongoose.Schema(
     },
     doctorName: {
       type: String,
-      required: true,
+      default: 'Attending Physician',
       trim: true
     },
     reportId: {
