@@ -210,10 +210,157 @@ export async function getBiomarkerTrends(req, res, next) {
   }
 }
 
+/**
+ * Record a continuous 1-minute IoT vital signs session into Medical Reports and update Patient vitals.
+ */
+export async function createIotReport(req, res, next) {
+  try {
+    const {
+      durationSeconds = 60,
+      avgBpm,
+      minBpm,
+      maxBpm,
+      avgSpo2,
+      minSpo2,
+      maxSpo2,
+      avgEcg,
+      avgPpg,
+      totalSamples = 0,
+      sessionNotes = '',
+      reportName = 'IoT Live Vital Monitoring Session (1-Min)'
+    } = req.body;
+
+    const bpmVal = Math.round(Number(avgBpm) || 0);
+    const spo2Val = Math.round(Number(avgSpo2) || 0);
+
+    if (bpmVal <= 0 && spo2Val <= 0) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_IOT_VITALS',
+          message: 'Valid physiological readings (Heart Rate or SpO2) are required from the IoT monitoring session.'
+        }
+      });
+    }
+
+    // Resolve patient profile linked to authenticated user
+    const patientProfile = await Patient.findOne({ userId: req.user._id });
+    const patientId = patientProfile ? patientProfile._id : null;
+    const hospitalId = patientProfile?.hospitalId || null;
+
+    // Evaluate clinical status for vital signs
+    let bpmStatus = 'Normal';
+    let bpmFlag = 'normal';
+    if (bpmVal > 100) { bpmStatus = 'High'; bpmFlag = 'high'; }
+    else if (bpmVal < 60) { bpmStatus = 'Low'; bpmFlag = 'low'; }
+
+    let spo2Status = 'Normal';
+    let spo2Flag = 'normal';
+    if (spo2Val < 90) { spo2Status = 'Critical'; spo2Flag = 'critical_low'; }
+    else if (spo2Val < 95) { spo2Status = 'Low'; spo2Flag = 'low'; }
+
+    const parameters = {
+      heart_rate: {
+        value: bpmVal,
+        unit: 'BPM',
+        ref_range: '60-100',
+        status: bpmStatus
+      },
+      spo2: {
+        value: spo2Val,
+        unit: '%',
+        ref_range: '95-100',
+        status: spo2Status
+      }
+    };
+
+    if (avgEcg !== undefined && avgEcg !== null) {
+      parameters.ecg_mean = {
+        value: Math.round(Number(avgEcg)),
+        unit: 'ADC (0-4095)',
+        ref_range: '1000-3000',
+        status: 'Normal'
+      };
+    }
+
+    if (avgPpg !== undefined && avgPpg !== null) {
+      parameters.ppg_amplitude = {
+        value: Math.round(Number(avgPpg)),
+        unit: 'counts',
+        ref_range: '>50000',
+        status: 'Normal'
+      };
+    }
+
+    // Clinical Risk Assessment
+    let overallRiskScore = 15;
+    const diseaseRisks = {
+      arrhythmia_risk: bpmStatus !== 'Normal' ? (bpmVal > 120 || bpmVal < 50 ? 0.75 : 0.45) : 0.05,
+      hypoxemia_risk: spo2Status === 'Critical' ? 0.90 : (spo2Status === 'Low' ? 0.60 : 0.04),
+      cardiovascular_strain: (bpmStatus !== 'Normal' || spo2Status !== 'Normal') ? 0.55 : 0.06
+    };
+
+    if (spo2Status === 'Critical' || bpmVal > 130 || bpmVal < 45) {
+      overallRiskScore = 85;
+    } else if (spo2Status === 'Low' || bpmStatus !== 'Normal') {
+      overallRiskScore = 48;
+    }
+
+    let riskTier = 'Low';
+    if (overallRiskScore >= 80) riskTier = 'Critical';
+    else if (overallRiskScore >= 60) riskTier = 'High';
+    else if (overallRiskScore >= 35) riskTier = 'Moderate';
+
+    const report = await MedicalReport.create({
+      reportId: generateReportLegacyId(),
+      userId: req.user._id,
+      patientId,
+      hospitalId,
+      sourceType: 'iot_device',
+      reportName,
+      reportType: 'Real-Time Vital Signs & Continuous Telemetry',
+      parameters,
+      mlResult: {
+        flags: {
+          heart_rate: bpmFlag,
+          spo2: spo2Flag
+        },
+        diseaseRisks,
+        overallRiskScore,
+        riskTier,
+        modelVersion: 'v1.0.0-iot-telemetry'
+      },
+      notes: sessionNotes || `Continuous ${durationSeconds}s IoT vital screening via ESP32, MAX30105 PPG & AD8232 ECG. Samples: ${totalSamples}. BPM Range: ${minBpm || bpmVal}-${maxBpm || bpmVal}. SpO2 Range: ${minSpo2 || spo2Val}-${maxSpo2 || spo2Val}%.`,
+      reportDate: new Date()
+    });
+
+    // Update patient profile vital signs in database
+    if (patientProfile) {
+      patientProfile.vitalSigns = {
+        ...patientProfile.vitalSigns,
+        heartRate: bpmVal,
+        spo2: `${spo2Val}%`,
+        oxygenSaturation: spo2Val,
+        recordedAt: new Date()
+      };
+      await patientProfile.save();
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: '1-minute IoT vital monitoring session recorded and saved to clinical records.',
+      report
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   createManualReport,
   uploadPdfReport,
+  createIotReport,
   getReports,
   getReportById,
   getBiomarkerTrends
 };
+

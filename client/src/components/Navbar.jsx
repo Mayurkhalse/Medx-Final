@@ -120,6 +120,7 @@ export function Navbar() {
       case 'patient':
         return [
           { id: 'dashboard', label: 'Dashboard', path: '/patient?tab=dashboard', icon: LayoutDashboard },
+          { id: 'iot', label: 'Live Vitals (IoT)', path: '/patient?tab=iot', icon: Activity },
           { id: 'reports', label: 'Reports', path: '/patient?tab=reports', icon: FileText },
           { id: 'appointments', label: 'Appointments', path: '/patient?tab=appointments', icon: Calendar },
           { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles }

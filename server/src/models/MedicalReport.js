@@ -93,7 +93,7 @@ const medicalReportSchema = new mongoose.Schema(
     },
     sourceType: {
       type: String,
-      enum: ['manual', 'upload', 'lab_direct'],
+      enum: ['manual', 'upload', 'lab_direct', 'iot_device'],
       required: true
     },
     fileUrl: {

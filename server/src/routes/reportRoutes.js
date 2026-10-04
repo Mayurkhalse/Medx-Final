@@ -5,6 +5,7 @@ import { requireRole } from '../middleware/roleGuard.js';
 import {
   createManualReport,
   uploadPdfReport,
+  createIotReport,
   getReports,
   getReportById,
   getBiomarkerTrends
@@ -42,6 +43,7 @@ router.get('/symptoms', ...patientAuth, getPatientSymptomHistory);
 // Ingestion endpoints
 router.post('/', ...patientAuth, createManualReport);
 router.post('/upload', ...patientAuth, handleFileUpload, uploadPdfReport);
+router.post('/iot', ...patientAuth, createIotReport);
 
 // Query & Analytics endpoints
 router.get('/', ...patientAuth, getReports);

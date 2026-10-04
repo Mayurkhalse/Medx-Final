@@ -67,7 +67,7 @@ const BIOMARKER_SPECS = {
   }
 };
 
-export default function PatientDashboard({ onNavigateToEntry }) {
+export default function PatientDashboard({ onNavigateToEntry, onNavigateToIot, scrollToSos }) {
   const [reports, setReports] = useState([]);
   const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -334,6 +334,26 @@ export default function PatientDashboard({ onNavigateToEntry }) {
             <AlertTriangle size={15} className={sosSending ? 'animate-spin' : ''} />
             <span>{sosSending ? 'Dispatching SOS...' : 'Emergency SOS'}</span>
           </button>
+          {onNavigateToIot && (
+            <button
+              onClick={onNavigateToIot}
+              className="medx-button"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                padding: '0.5rem 0.875rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                backgroundColor: '#F5F3FF',
+                color: '#6D28D9',
+                border: '1px solid #DDD6FE',
+                cursor: 'pointer'
+              }}
+            >
+              <Activity size={15} /> Live Vitals (IoT)
+            </button>
+          )}
           {onNavigateToEntry && (
             <button
               onClick={onNavigateToEntry}

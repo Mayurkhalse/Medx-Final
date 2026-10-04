@@ -6,11 +6,12 @@ import PatientDashboard from '../patient/PatientDashboard.jsx';
 import PatientReportEntry from '../patient/PatientReportEntry.jsx';
 import PatientWhatIf from '../patient/PatientWhatIf.jsx';
 import PatientAppointments from '../patient/PatientAppointments.jsx';
+import PatientLiveVitals from '../patient/PatientLiveVitals.jsx';
 
 export function PatientWorkspace() {
   const { user, profile, role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'dashboard'; // 'dashboard' | 'entry' | 'whatif' | 'appointments' | 'sos'
+  const activeTab = searchParams.get('tab') || 'dashboard'; // 'dashboard' | 'entry' | 'whatif' | 'appointments' | 'sos' | 'iot'
 
   const setActiveTab = (tab) => {
     setSearchParams({ tab });
@@ -35,7 +36,7 @@ export function PatientWorkspace() {
                 Patient Workspace
               </h1>
               <p style={{ color: 'var(--medx-text-secondary)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>
-                Secure Patient Diagnostics, Biomarker Analytics, What-If AI Simulation & Consultations
+                Secure Patient Diagnostics, Biomarker Analytics, Live IoT Telemetry & Consultations
               </p>
             </div>
           </div>
@@ -64,11 +65,22 @@ export function PatientWorkspace() {
 
       {/* Primary Tab Panels */}
       {(activeTab === 'biomarkers' || activeTab === 'dashboard' || activeTab === 'sos') && (
-        <PatientDashboard onNavigateToEntry={() => setActiveTab('reports')} scrollToSos={activeTab === 'sos'} />
+        <PatientDashboard
+          onNavigateToEntry={() => setActiveTab('reports')}
+          onNavigateToIot={() => setActiveTab('iot')}
+          scrollToSos={activeTab === 'sos'}
+        />
       )}
 
       {(activeTab === 'reports' || activeTab === 'entry') && (
         <PatientReportEntry onReportCreated={() => setActiveTab('dashboard')} />
+      )}
+
+      {(activeTab === 'iot' || activeTab === 'vitals' || activeTab === 'live') && (
+        <PatientLiveVitals
+          onReportCreated={() => {}}
+          onNavigateToReports={() => setActiveTab('dashboard')}
+        />
       )}
 
       {(activeTab === 'what-if' || activeTab === 'whatif') && (

@@ -1,6 +1,7 @@
 import app from './app.js';
 import config from './config/config.js';
 import { connectDB } from './config/db.js';
+import { startIotWebSocketServer, stopIotWebSocketServer } from './services/iotWebSocket.js';
 
 async function startServer() {
   try {
@@ -11,6 +12,9 @@ async function startServer() {
 
     // Establish persistent MongoDB connection
     await connectDB();
+
+    // Start Real-Time IoT Telemetry WebSocket Server (Port 8080)
+    startIotWebSocketServer();
 
     // Start HTTP Server
     const server = app.listen(config.PORT, '0.0.0.0', () => {
@@ -23,6 +27,7 @@ async function startServer() {
     // Graceful Shutdown Handlers
     const shutdown = async (signal) => {
       console.log(`\n[SERVER] Received ${signal}. Gracefully shutting down...`);
+      stopIotWebSocketServer();
       server.close(async () => {
         console.log('[SERVER] HTTP server closed.');
         process.exit(0);

@@ -29,7 +29,8 @@ const config = {
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
-  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback'
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+  IOT_WS_PORT: parseInt(process.env.IOT_WS_PORT || '8080', 10)
 };
 
 // Validate mandatory configuration at startup

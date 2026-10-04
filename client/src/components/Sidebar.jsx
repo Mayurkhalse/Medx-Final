@@ -114,6 +114,7 @@ export function Sidebar({ mobileOpen, setMobileOpen, collapsed = false, onToggle
       case 'patient':
         return [
           { id: 'dashboard', label: 'Dashboard', path: '/patient?tab=dashboard', icon: LayoutDashboard },
+          { id: 'iot', label: 'Live Vitals (IoT)', path: '/patient?tab=iot', icon: Activity, isLive: true },
           { id: 'reports', label: 'Reports', path: '/patient?tab=reports', icon: FileText },
           { id: 'appointments', label: 'Appointments', path: '/patient?tab=appointments', icon: Calendar },
           { id: 'whatif', label: 'What-If AI', path: '/patient?tab=whatif', icon: Sparkles },
@@ -406,6 +407,20 @@ export function Sidebar({ mobileOpen, setMobileOpen, collapsed = false, onToggle
                       textTransform: 'uppercase'
                     }}>
                       SOS
+                    </span>
+                  )}
+                  {item.isLive && (
+                    <span style={{
+                      backgroundColor: '#10B981',
+                      color: '#FFFFFF',
+                      fontSize: '0.625rem',
+                      fontWeight: 800,
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '9999px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}>
+                      LIVE
                     </span>
                   )}
                 </button>
